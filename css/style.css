@@ -45,15 +45,15 @@ body {
   top: 20px;
   right: 20px;
   z-index: 9999;
-  width: 48px;
-  height: 48px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   border: 1px solid rgba(255,255,255,0.3);
   background: rgba(0,0,0,0.4);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   color: #fff;
-  font-size: 16px;
+  font-size: 10px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -63,8 +63,8 @@ body {
 .bgm-btn:hover { transform: scale(1.1); background: rgba(0,0,0,0.6); }
 .bgm-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .bgm-btn .bgm-icon { pointer-events: none; }
-.bgm-btn .bgm-icon.play { font-size: 14px; }
-.bgm-btn .bgm-icon.pause { font-size: 12px; letter-spacing: 2px; }
+.bgm-btn .bgm-icon.play { font-size: 9px; }
+.bgm-btn .bgm-icon.pause { font-size: 8px; letter-spacing: 1px; }
 
 .bgm-pulse {
   position: absolute;
@@ -332,6 +332,12 @@ body {
   position: relative;
   overflow: hidden;
 }
+.section-hero {
+  align-items: flex-start;
+}
+.section-hero .hero-content {
+  padding-top: 120px;
+}
 
 .section-inner {
   width: 100%;
@@ -518,18 +524,40 @@ body {
 }
 
 .dday { margin-top: 8px; }
-.dday-number {
+.dday-units {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 4px;
+}
+.dday-unit { text-align: center; }
+.dday-value {
   display: block;
   font-family: var(--font-display);
-  font-size: 2rem;
-  color: var(--accent);
+  font-size: 2.2rem;
   font-weight: 600;
+  color: var(--accent);
+  min-width: 56px;
+}
+.dday-label {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.dday-sep {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  color: var(--accent);
+  opacity: 0.5;
+  padding-bottom: 18px;
 }
 .dday-text {
   display: block;
   font-size: 0.85rem;
   color: var(--text-muted);
-  margin-top: 4px;
+  margin-top: 12px;
 }
 
 /* ===========================
@@ -696,6 +724,20 @@ body {
   transition: background 0.2s;
 }
 .btn-account:hover { background: #eee; }
+.btn-kakao, .btn-toss {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  text-decoration: none;
+}
+.btn-kakao img, .btn-toss img {
+  display: block;
+  height: 24px;
+  width: auto;
+  object-fit: contain;
+  border-radius: 4px;
+}
 
 /* ===========================
    Section 7: RSVP
@@ -723,6 +765,12 @@ body {
   font-size: 0.95rem;
   margin-bottom: 28px;
 }
+.rsvp-btn-group {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
 .btn-rsvp-open {
   border-color: rgba(255,255,255,0.4);
   color: #fff;
@@ -749,7 +797,7 @@ body {
 .section-footer {
   background: #111;
   color: var(--text-light);
-  min-height: 70vh;
+  min-height: 100vh;
 }
 .footer-bg {
   position: absolute;

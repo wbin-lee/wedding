@@ -43,9 +43,7 @@ async function loadGuest() {
 
   // Check if already submitted RSVP
   if (localStorage.getItem('rsvp-submitted')) {
-    document.getElementById('rsvp-prompt-text').textContent = '참석 의사를 전달해 주셔서 감사합니다!';
-    document.getElementById('btn-section-rsvp').textContent = '전달 완료';
-    document.getElementById('btn-section-rsvp').disabled = true;
+    showRSVPCompleted();
   }
 }
 
@@ -61,9 +59,14 @@ function initBGM() {
   const iconPlay = btn.querySelector('.play');
   const iconPause = btn.querySelector('.pause');
 
-  // Restore mute state
+  // Restore mute state — default is play
   if (localStorage.getItem('bgm-muted') === 'true') {
     userPausedManually = true;
+  }
+
+  // Attempt autoplay immediately
+  if (!userPausedManually) {
+    bgm.play().then(updateBGMUI).catch(() => {});
   }
 
   function updateBGMUI() {
@@ -141,6 +144,13 @@ function initLanding() {
 /* ===========================
    RSVP Modal
    =========================== */
+function showRSVPCompleted() {
+  document.getElementById('rsvp-prompt-text').textContent = '참석 의사를 전달해 주셔서 감사합니다!';
+  document.getElementById('btn-section-rsvp').textContent = '전달 완료';
+  document.getElementById('btn-section-rsvp').disabled = true;
+  document.getElementById('btn-section-rsvp-edit').style.display = '';
+}
+
 function openRSVP() {
   document.getElementById('rsvp-modal').style.display = '';
 }
@@ -168,6 +178,16 @@ function initRSVP() {
   // Section 7 RSVP button
   document.getElementById('btn-section-rsvp').addEventListener('click', openRSVP);
 
+  // Edit button — reopen modal with form visible
+  document.getElementById('btn-section-rsvp-edit').addEventListener('click', () => {
+    document.getElementById('rsvp-form-content').style.display = '';
+    document.getElementById('rsvp-thankyou').style.display = 'none';
+    const btn = document.getElementById('rsvp-submit');
+    btn.disabled = false;
+    btn.textContent = '수정하기';
+    openRSVP();
+  });
+
   // Submit
   document.getElementById('rsvp-submit').addEventListener('click', submitRSVP);
 }
@@ -186,36 +206,48 @@ function setToggle(groupId, value) {
 
 async function submitRSVP() {
   const btn = document.getElementById('rsvp-submit');
+  const nameVal = document.getElementById('rsvp-name').value.trim();
+  const phoneVal = document.getElementById('rsvp-phone').value.trim();
+
+  if (!nameVal) {
+    showToast('성함을 입력해 주세요');
+    return;
+  }
+  if (!/^\d{4}$/.test(phoneVal)) {
+    showToast('연락처 뒷자리 4자리를 입력해 주세요');
+    return;
+  }
+
   btn.disabled = true;
   btn.textContent = '전송 중...';
 
   const data = {
-    [RSVP_FORM.fields.side]: getToggleValue('rsvp-side'),
-    [RSVP_FORM.fields.attend]: getToggleValue('rsvp-attend'),
-    [RSVP_FORM.fields.meal]: getToggleValue('rsvp-meal'),
-    [RSVP_FORM.fields.name]: document.getElementById('rsvp-name').value,
-    [RSVP_FORM.fields.guests]: document.getElementById('rsvp-guests').value,
+    type: 'rsvp',
+    side: getToggleValue('rsvp-side'),
+    attend: getToggleValue('rsvp-attend'),
+    meal: getToggleValue('rsvp-meal'),
+    name: nameVal,
+    phone: phoneVal,
+    guests: document.getElementById('rsvp-guests').value,
   };
 
   try {
-    const formData = new URLSearchParams(data);
-    await fetch(RSVP_FORM.url, {
+    await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
-      body: formData,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
     });
+
+    localStorage.setItem('rsvp-submitted', 'true');
+    document.getElementById('rsvp-form-content').style.display = 'none';
+    document.getElementById('rsvp-thankyou').style.display = '';
+    showRSVPCompleted();
   } catch {
-    // Google Forms cross-origin will throw but still submits
+    btn.disabled = false;
+    btn.textContent = '제출하기';
+    showToast('전송에 실패했습니다. 다시 시도해 주세요.');
   }
-
-  localStorage.setItem('rsvp-submitted', 'true');
-  document.getElementById('rsvp-form-content').style.display = 'none';
-  document.getElementById('rsvp-thankyou').style.display = '';
-
-  // Update section 7
-  document.getElementById('rsvp-prompt-text').textContent = '참석 의사를 전달해 주셔서 감사합니다!';
-  document.getElementById('btn-section-rsvp').textContent = '전달 완료';
-  document.getElementById('btn-section-rsvp').disabled = true;
 }
 
 /* ===========================
@@ -268,21 +300,42 @@ function renderCalendar() {
 function updateDDay() {
   const now = new Date();
   const diff = WEDDING.date - now;
-  const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-  const ddayEl = document.getElementById('dday');
-  const numEl = ddayEl.querySelector('.dday-number');
-  const textEl = ddayEl.querySelector('.dday-text');
+  const textEl = document.getElementById('dday-text');
+  const daysEl = document.getElementById('dday-days');
+  const hoursEl = document.getElementById('dday-hours');
+  const minsEl = document.getElementById('dday-mins');
+  const secsEl = document.getElementById('dday-secs');
 
-  if (days > 0) {
-    numEl.textContent = `D - ${days}`;
-    textEl.textContent = `결혼식까지 ${days}일 남았습니다`;
-  } else if (days === 0) {
-    numEl.textContent = '🎉 오늘입니다!';
-    textEl.textContent = '축복해 주세요';
+  if (diff > 0) {
+    const totalSec = Math.floor(diff / 1000);
+    const d = Math.floor(totalSec / 86400);
+    const h = Math.floor((totalSec % 86400) / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    daysEl.textContent = d;
+    hoursEl.textContent = String(h).padStart(2, '0');
+    minsEl.textContent = String(m).padStart(2, '0');
+    secsEl.textContent = String(s).padStart(2, '0');
+    textEl.textContent = `결혼식까지 ${d}일 남았습니다`;
+  } else if (diff > -86400000) {
+    daysEl.textContent = '🎉';
+    hoursEl.textContent = '00';
+    minsEl.textContent = '00';
+    secsEl.textContent = '00';
+    textEl.textContent = '오늘입니다! 축복해 주세요';
   } else {
-    numEl.textContent = `D + ${Math.abs(days)}`;
-    textEl.textContent = `결혼식이 ${Math.abs(days)}일 지났습니다`;
+    const absDays = Math.floor(Math.abs(diff) / 86400000);
+    daysEl.textContent = absDays;
+    hoursEl.textContent = '00';
+    minsEl.textContent = '00';
+    secsEl.textContent = '00';
+    textEl.textContent = `결혼식이 ${absDays}일 지났습니다`;
   }
+}
+
+function startDDayTimer() {
+  updateDDay();
+  setInterval(updateDDay, 1000);
 }
 
 /* ===========================
@@ -386,8 +439,8 @@ function renderAccounts(side) {
       <div class="account-number">${acc.bank} ${acc.number}</div>
       <div class="account-actions">
         <button class="btn-account" onclick="copyAccount('${acc.number}')">계좌번호 복사</button>
-        ${acc.kakao ? `<a class="btn-account" href="${acc.kakao}" target="_blank" rel="noopener">카카오 송금</a>` : ''}
-        ${acc.toss ? `<a class="btn-account" href="${acc.toss}" target="_blank" rel="noopener">토스 송금</a>` : ''}
+        ${acc.kakao ? `<a class="btn-account btn-kakao" href="${acc.kakao}" target="_blank" rel="noopener" aria-label="카카오페이 송금"><img src="images/icon-kakaopay.svg" alt="카카오페이" /></a>` : ''}
+        ${acc.toss ? `<a class="btn-account btn-toss" href="${acc.toss}" target="_blank" rel="noopener" aria-label="토스 송금"><img src="images/icon-toss.svg" alt="토스" /></a>` : ''}
       </div>
     </div>
   `).join('');
@@ -489,23 +542,23 @@ async function submitTimeCapsule() {
   btn.disabled = true;
   btn.textContent = '전송 중...';
 
-  const data = {
-    [TIMECAPSULE_FORM.fields.name]: name,
-    [TIMECAPSULE_FORM.fields.message]: message,
-  };
+  const data = { type: 'timecapsule', name, message };
 
   try {
-    await fetch(TIMECAPSULE_FORM.url, {
+    await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
-      body: new URLSearchParams(data),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
     });
-  } catch {
-    // Google Forms cross-origin
-  }
 
-  document.getElementById('tc-form-content').style.display = 'none';
-  document.getElementById('tc-thankyou').style.display = '';
+    document.getElementById('tc-form-content').style.display = 'none';
+    document.getElementById('tc-thankyou').style.display = '';
+  } catch {
+    btn.disabled = false;
+    btn.textContent = '타임캡슐에 담기';
+    showToast('전송에 실패했습니다. 다시 시도해 주세요.');
+  }
 }
 
 /* ===========================
@@ -528,7 +581,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initLanding();
   initRSVP();
   renderCalendar();
-  updateDDay();
+  startDDayTimer();
   initGallery();
   initAccounts();
   initPetals();

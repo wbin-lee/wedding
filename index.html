@@ -77,7 +77,12 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">⑤ 추가 동행 인원</label>
+          <label class="form-label">⑤ 연락처 뒷자리 4자리</label>
+          <input type="tel" class="form-input" id="rsvp-phone" placeholder="예: 1234" maxlength="4" inputmode="numeric" pattern="[0-9]{4}" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">⑥ 추가 동행 인원</label>
           <select class="form-select" id="rsvp-guests">
             <option value="0">0명</option>
             <option value="1">1명</option>
@@ -142,8 +147,16 @@
         <div class="calendar anim-fade" id="calendar"></div>
         <div class="date-divider anim-fade"></div>
         <div class="dday anim-fade" id="dday">
-          <span class="dday-number"></span>
-          <span class="dday-text"></span>
+          <div class="dday-units">
+            <div class="dday-unit"><span class="dday-value" id="dday-days">0</span><span class="dday-label">DAYS</span></div>
+            <div class="dday-sep">:</div>
+            <div class="dday-unit"><span class="dday-value" id="dday-hours">0</span><span class="dday-label">HOURS</span></div>
+            <div class="dday-sep">:</div>
+            <div class="dday-unit"><span class="dday-value" id="dday-mins">0</span><span class="dday-label">MIN</span></div>
+            <div class="dday-sep">:</div>
+            <div class="dday-unit"><span class="dday-value" id="dday-secs">0</span><span class="dday-label">SEC</span></div>
+          </div>
+          <span class="dday-text" id="dday-text"></span>
         </div>
       </div>
     </section>
@@ -156,16 +169,18 @@
         <p class="location-address anim-fade">서울특별시 서초구 강남대로 213 (양재동 24)</p>
         <div class="map-container anim-fade" id="map">
           <iframe
-            src="https://map.kakao.com/?q=엘타워"
-            width="100%" height="250"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3165.5!2d127.0353!3d37.4842!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357ca15a8e877d01%3A0x40cb32604de08f46!2z7JeY7YOA7JuM!5e0!3m2!1sko!2skr!4v1"
+            width="100%" height="280"
             style="border:0; border-radius:12px;"
+            allowfullscreen=""
             loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
             title="엘타워 지도"
           ></iframe>
         </div>
         <div class="map-buttons anim-fade">
           <a class="btn btn-map" href="https://map.naver.com/v5/search/엘타워" target="_blank" rel="noopener">네이버지도</a>
-          <a class="btn btn-map" href="https://tmap.life/navigate?goalname=엘타워" target="_blank" rel="noopener">티맵</a>
+          <a class="btn btn-map" href="https://tmap.life/1ca891d9" target="_blank" rel="noopener">티맵</a>
           <a class="btn btn-map" href="https://map.kakao.com/?q=엘타워" target="_blank" rel="noopener">카카오맵</a>
         </div>
         <div class="location-info anim-fade">
@@ -208,7 +223,10 @@
         <p class="rsvp-prompt anim-fade" id="rsvp-prompt-text">아직 참석 의사를 전달하지 않으셨나요?</p>
         <p class="rsvp-sub anim-fade">모든 분들을 소중히 모실 수 있도록<br/>참석 의사를 알려주시면 감사하겠습니다.</p>
         <p class="rsvp-couple anim-fade">신랑 이우빈 &ensp;♡&ensp; 신부 이여울</p>
-        <button class="btn btn-outline btn-rsvp-open anim-fade" id="btn-section-rsvp">참석의사 전달하기</button>
+        <div class="rsvp-btn-group anim-fade">
+          <button class="btn btn-outline btn-rsvp-open" id="btn-section-rsvp">참석의사 전달하기</button>
+          <button class="btn btn-outline btn-rsvp-open" id="btn-section-rsvp-edit" style="display:none">수정하기</button>
+        </div>
       </div>
     </section>
 
