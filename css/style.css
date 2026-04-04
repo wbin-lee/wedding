@@ -733,7 +733,7 @@ body {
 }
 .btn-kakao img, .btn-toss img {
   display: block;
-  height: 24px;
+  height: 20px;
   width: auto;
   object-fit: contain;
   border-radius: 4px;

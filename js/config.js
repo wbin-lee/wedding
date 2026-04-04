@@ -8,7 +8,7 @@ const WEDDING = {
   dateEn: 'Sunday, November 1, 2026 · 3:00 PM',
   venue: '엘타워 6F 그레이스홀',
   address: '서울특별시 서초구 강남대로 213 (양재동 24)',
-  parking: '주차는 1시간 30분 무료 제공되며, 이후에는 주차요금이 부과될 수 있습니다.',
+  parking: '주차는 2시간 무료 제공됩니다.',
   transit: '양재역 도보 1분 이내',
   groomFather: '이성민',
   groomMother: '김혜련',

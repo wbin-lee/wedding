@@ -456,6 +456,21 @@ async function copyAccount(number) {
 }
 
 /* ===========================
+   Map Buttons (Section 4)
+   =========================== */
+function initMapButtons() {
+  const container = document.getElementById('map-buttons');
+  const buttons = [
+    { label: '네이버지도', url: MAP_LINKS.naver },
+    { label: '티맵', url: MAP_LINKS.tmap },
+    { label: '카카오맵', url: MAP_LINKS.kakao },
+  ];
+  container.innerHTML = buttons.map(b =>
+    `<a class="btn btn-map" href="${b.url}" target="_blank" rel="noopener">${b.label}</a>`
+  ).join('');
+}
+
+/* ===========================
    Petals (Section 1)
    =========================== */
 function initPetals() {
@@ -584,6 +599,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   startDDayTimer();
   initGallery();
   initAccounts();
+  initMapButtons();
   initPetals();
   initTimeCapsule();
   applyWeatherTheme();
