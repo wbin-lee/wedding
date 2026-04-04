@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>우빈 ♡ 여울 Wedding Invitation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Noto+Serif+KR:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ============ BGM Player (Global Fixed) ============ -->
+  <button id="bgm-btn" class="bgm-btn" aria-label="배경음악 재생" tabindex="0">
+    <span class="bgm-icon play">▶</span>
+    <span class="bgm-icon pause" style="display:none">❚❚</span>
+    <span class="bgm-pulse"></span>
+  </button>
+
+  <!-- ============ Landing Screen ============ -->
+  <div id="landing" class="landing">
+    <div class="film-grain"></div>
+    <div class="landing-particles" id="landing-particles"></div>
+    <div class="landing-content">
+      <p class="landing-line fade-seq" data-delay="0"><span id="landing-name">소중한 분</span>님,</p>
+      <p class="landing-line fade-seq" data-delay="300">우리 결혼합니다 💍</p>
+      <p class="landing-line fade-seq landing-msg" data-delay="600" id="landing-msg">함께해 주셔서 감사합니다.</p>
+      <div class="landing-divider fade-seq" data-delay="900"></div>
+      <p class="landing-line fade-seq" data-delay="1200">신랑 이우빈 &ensp;♡&ensp; 신부 이여울</p>
+      <p class="landing-line fade-seq" data-delay="1500">2026년 11월 1일 일요일 오후 3시</p>
+      <p class="landing-line fade-seq" data-delay="1800">엘타워 6F 그레이스홀</p>
+      <div class="landing-divider fade-seq" data-delay="2100"></div>
+      <p class="landing-line fade-seq" data-delay="2400">모든 분들을 소중히 모실 수 있도록<br/>참석 의사를 체크해 주세요.</p>
+      <div class="landing-buttons fade-seq slide-up" data-delay="2700">
+        <button class="btn btn-primary" id="btn-view-invitation">청첩장 보기</button>
+        <button class="btn btn-outline" id="btn-landing-rsvp">참석의사 전달하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ RSVP Modal ============ -->
+  <div id="rsvp-modal" class="modal-overlay" style="display:none">
+    <div class="modal">
+      <button class="modal-close" id="rsvp-close" aria-label="닫기">&times;</button>
+      <div id="rsvp-form-content">
+        <h2 class="modal-title">참석 의사를 전달해 주세요</h2>
+
+        <div class="form-group">
+          <label class="form-label">① 어느 분의 하객이신가요?</label>
+          <div class="toggle-group" id="rsvp-side">
+            <button class="toggle-btn active" data-value="groom">신랑측</button>
+            <button class="toggle-btn" data-value="bride">신부측</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">② 참석 가능하신가요?</label>
+          <div class="toggle-group" id="rsvp-attend">
+            <button class="toggle-btn active" data-value="yes">O 참석</button>
+            <button class="toggle-btn" data-value="no">X 불참</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">③ 식사 예정이신가요?</label>
+          <div class="toggle-group" id="rsvp-meal">
+            <button class="toggle-btn active" data-value="yes">O 예정</button>
+            <button class="toggle-btn" data-value="no">X 불필요</button>
+            <button class="toggle-btn" data-value="maybe">미정</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">④ 성함</label>
+          <input type="text" class="form-input" id="rsvp-name" placeholder="성함을 입력해주세요" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">⑤ 추가 동행 인원</label>
+          <select class="form-select" id="rsvp-guests">
+            <option value="0">0명</option>
+            <option value="1">1명</option>
+            <option value="2">2명</option>
+            <option value="3">3명</option>
+            <option value="4">4명</option>
+            <option value="5">5명</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary btn-full" id="rsvp-submit">제출하기</button>
+      </div>
+      <div id="rsvp-thankyou" style="display:none">
+        <div class="thankyou-content">
+          <p class="thankyou-emoji">💌</p>
+          <p class="thankyou-text">소중한 마음 감사합니다</p>
+          <p class="thankyou-sub">당일 기쁜 마음으로 맞이하겠습니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Main Screen ============ -->
+  <div id="main" class="main-screen" style="display:none">
+
+    <!-- Section 1: Hero -->
+    <section class="section section-hero" id="sec-hero">
+      <div class="hero-bg">
+        <div class="hero-overlay"></div>
+      </div>
+      <div class="petal-container" id="petals"></div>
+      <div class="section-inner hero-content">
+        <p class="hero-names anim-fade">
+          <span class="font-display">Woobin</span>
+          &ensp;<span class="hero-heart">♡</span>&ensp;
+          <span class="font-display">Yeoul</span>
+        </p>
+        <p class="hero-date anim-fade">2026 . 11 . 01</p>
+      </div>
+    </section>
+
+    <!-- Section 2: Invitation -->
+    <section class="section section-invitation" id="sec-invitation">
+      <div class="section-inner">
+        <p class="invitation-quote anim-fade font-display-italic">"사랑은 오래 참고<br/>사랑은 온유하며"</p>
+        <div class="invitation-divider anim-fade"></div>
+        <p class="invitation-text anim-fade">저희 두 사람이 함께하는 새로운 시작에<br/>귀한 발걸음으로 축복해 주시면 감사하겠습니다.</p>
+        <div class="invitation-family anim-fade">
+          <p>이성민 · 김혜련<span class="family-relation">의 아들</span> &ensp;신랑 <strong>이우빈</strong></p>
+          <p>이명재 · 이정희<span class="family-relation">의 딸</span> &ensp;&ensp;신부 <strong>이여울</strong></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Date -->
+    <section class="section section-date" id="sec-date">
+      <div class="section-inner">
+        <h2 class="section-title anim-fade">WEDDING DAY</h2>
+        <p class="date-ko anim-fade">2026년 11월 1일 일요일 오후 3시</p>
+        <p class="date-en anim-fade">Sunday, November 1, 2026 · 3:00 PM</p>
+        <div class="date-divider anim-fade"></div>
+        <div class="calendar anim-fade" id="calendar"></div>
+        <div class="date-divider anim-fade"></div>
+        <div class="dday anim-fade" id="dday">
+          <span class="dday-number"></span>
+          <span class="dday-text"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Location -->
+    <section class="section section-location" id="sec-location">
+      <div class="section-inner">
+        <h2 class="section-title anim-fade">LOCATION</h2>
+        <p class="location-venue anim-fade">엘타워 6F 그레이스홀</p>
+        <p class="location-address anim-fade">서울특별시 서초구 강남대로 213 (양재동 24)</p>
+        <div class="map-container anim-fade" id="map">
+          <iframe
+            src="https://map.kakao.com/?q=엘타워"
+            width="100%" height="250"
+            style="border:0; border-radius:12px;"
+            loading="lazy"
+            title="엘타워 지도"
+          ></iframe>
+        </div>
+        <div class="map-buttons anim-fade">
+          <a class="btn btn-map" href="https://map.naver.com/v5/search/엘타워" target="_blank" rel="noopener">네이버지도</a>
+          <a class="btn btn-map" href="https://tmap.life/navigate?goalname=엘타워" target="_blank" rel="noopener">티맵</a>
+          <a class="btn btn-map" href="https://map.kakao.com/?q=엘타워" target="_blank" rel="noopener">카카오맵</a>
+        </div>
+        <div class="location-info anim-fade">
+          <p>🅿️ <strong>주차 안내</strong><br/>주차는 1시간 30분 무료 제공되며,<br/>이후에는 주차요금이 부과될 수 있는 점 참고하시기 바랍니다.</p>
+          <p>🚇 양재역 도보 1분 이내</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Gallery -->
+    <section class="section section-gallery" id="sec-gallery">
+      <div class="section-inner">
+        <h2 class="section-title anim-fade">GALLERY</h2>
+        <div class="gallery-slider anim-fade">
+          <button class="gallery-arrow gallery-prev" aria-label="이전 사진">&#8249;</button>
+          <div class="gallery-track" id="gallery-track"></div>
+          <button class="gallery-arrow gallery-next" aria-label="다음 사진">&#8250;</button>
+        </div>
+        <div class="gallery-counter anim-fade" id="gallery-counter">1 / 20</div>
+        <div class="gallery-dots anim-fade" id="gallery-dots"></div>
+      </div>
+    </section>
+
+    <!-- Section 6: Accounts -->
+    <section class="section section-accounts" id="sec-accounts">
+      <div class="section-inner">
+        <h2 class="section-title anim-fade">마음 전하실 곳</h2>
+        <div class="account-tabs anim-fade">
+          <button class="tab-btn active" data-tab="groom">신랑측</button>
+          <button class="tab-btn" data-tab="bride">신부측</button>
+        </div>
+        <div class="account-list anim-fade" id="account-list"></div>
+      </div>
+    </section>
+
+    <!-- Section 7: RSVP -->
+    <section class="section section-rsvp" id="sec-rsvp">
+      <div class="section-inner">
+        <p class="rsvp-name anim-fade"><span id="rsvp-section-name">소중한 분</span>님,</p>
+        <p class="rsvp-prompt anim-fade" id="rsvp-prompt-text">아직 참석 의사를 전달하지 않으셨나요?</p>
+        <p class="rsvp-sub anim-fade">모든 분들을 소중히 모실 수 있도록<br/>참석 의사를 알려주시면 감사하겠습니다.</p>
+        <p class="rsvp-couple anim-fade">신랑 이우빈 &ensp;♡&ensp; 신부 이여울</p>
+        <button class="btn btn-outline btn-rsvp-open anim-fade" id="btn-section-rsvp">참석의사 전달하기</button>
+      </div>
+    </section>
+
+    <!-- Time Capsule -->
+    <section class="section section-timecapsule" id="sec-timecapsule">
+      <div class="section-inner">
+        <h2 class="section-title anim-fade">💌 타임캡슐</h2>
+        <p class="tc-desc anim-fade">우리 부부에게 1년 후 전달될 메시지를 남겨주세요 📬</p>
+        <div class="tc-form anim-fade" id="tc-form-content">
+          <input type="text" class="form-input" id="tc-name" placeholder="성함을 입력해주세요" />
+          <textarea class="form-textarea" id="tc-message" placeholder="1년 후의 우빈&여울에게 전하고 싶은 말..." rows="4"></textarea>
+          <button class="btn btn-primary btn-full" id="tc-submit">타임캡슐에 담기</button>
+        </div>
+        <div id="tc-thankyou" style="display:none">
+          <p class="thankyou-text">소중한 메시지가 담겼습니다 💌</p>
+          <p class="thankyou-sub">2027년 11월 1일에 전달됩니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 8: Footer -->
+    <section class="section section-footer" id="sec-footer">
+      <div class="footer-bg">
+        <div class="hero-overlay"></div>
+      </div>
+      <div class="section-inner footer-content">
+        <p class="footer-quote anim-fade font-display-italic">
+          "사랑은 두 사람이 서로를 바라보는 것이 아니라,<br/>
+          함께 같은 방향을 바라보는 것이다."
+        </p>
+        <p class="footer-author anim-fade">— 《어린 왕자》, 앙투안 드 생텍쥐페리</p>
+        <div class="footer-divider anim-fade"></div>
+        <p class="footer-copy anim-fade">© 2026 Woobin &amp; Yeoul</p>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Toast notification -->
+  <div id="toast" class="toast" style="display:none"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
