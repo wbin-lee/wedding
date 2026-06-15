@@ -339,57 +339,101 @@ function startDDayTimer() {
 }
 
 /* ===========================
-   Gallery (Section 5)
+   Gallery (Section 5) — Instagram UI
    =========================== */
-function initGallery() {
-  const track = document.getElementById('gallery-track');
-  const dotsContainer = document.getElementById('gallery-dots');
+let igLikes = [];     // 사진별 좋아요 수
+let igComments = [];  // 사진별 댓글 배열 [{name, text}]
+let igLiked = [];     // 이 기기에서 내가 좋아요한 사진(빨강 유지용)
 
-  // Create slides with placeholder images (replace with actual photos)
+const IG_CAPTIONS = [
+  '함께라서 더 빛나는 순간 ✨ #우빈여울 #웨딩 #2026',
+  '평생 너의 손을 잡고 걸을게 💍 #wedding',
+  '우리의 이야기가 시작되는 날 🤍 #예비부부',
+  '사랑한다는 말로는 부족한 하루 🌿 #weddingday',
+  '오래도록 이 미소 그대로 😊 #couple #11월의신부',
+];
+
+function igCaption(i) { return IG_CAPTIONS[i % IG_CAPTIONS.length]; }
+
+function igLoadState() {
+  try { igLikes = JSON.parse(localStorage.getItem('ig-likes')) || []; } catch { igLikes = []; }
+  try { igComments = JSON.parse(localStorage.getItem('ig-comments')) || []; } catch { igComments = []; }
+  for (let i = 0; i < GALLERY_COUNT; i++) {
+    if (typeof igLikes[i] !== 'number') igLikes[i] = 18 + ((i * 13) % 84); // 보기 좋은 기본 좋아요 수
+    if (!Array.isArray(igComments[i])) igComments[i] = [];
+  }
+}
+function igSaveState() {
+  localStorage.setItem('ig-likes', JSON.stringify(igLikes));
+  localStorage.setItem('ig-comments', JSON.stringify(igComments));
+}
+
+function initGallery() {
+  igLoadState();
+
+  const track = document.getElementById('ig-track');
   for (let i = 1; i <= GALLERY_COUNT; i++) {
     const img = document.createElement('img');
-    img.className = 'gallery-slide';
+    img.className = 'ig-slide';
     img.src = `images/gallery-${String(i).padStart(2, '0')}.jpg`;
     img.alt = `웨딩 사진 ${i}`;
     img.loading = 'lazy';
-    // Fallback for missing images
+    img.draggable = false;
     img.onerror = function () {
-      this.src = `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="533" fill="#f0ede8"><rect width="100%" height="100%"/><text x="50%" y="50%" text-anchor="middle" fill="#c9a96e" font-size="20" font-family="serif">Photo ${i}</text></svg>`)}`;
+      this.src = `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" fill="#f0ede8"><rect width="100%" height="100%"/><text x="50%" y="50%" text-anchor="middle" fill="#c9a96e" font-size="20" font-family="serif">Photo ${i}</text></svg>`)}`;
       this.onerror = null;
     };
     track.appendChild(img);
-
-    const dot = document.createElement('button');
-    dot.className = `gallery-dot${i === 1 ? ' active' : ''}`;
-    dot.setAttribute('aria-label', `사진 ${i}`);
-    dot.addEventListener('click', () => goToSlide(i - 1));
-    dotsContainer.appendChild(dot);
   }
 
-  document.querySelector('.gallery-prev').addEventListener('click', () => {
-    goToSlide(galleryIndex - 1);
-  });
-  document.querySelector('.gallery-next').addEventListener('click', () => {
-    goToSlide(galleryIndex + 1);
+  document.querySelector('.ig-prev').addEventListener('click', () => goToSlide(galleryIndex - 1));
+  document.querySelector('.ig-next').addEventListener('click', () => goToSlide(galleryIndex + 1));
+
+  // 좋아요 버튼: 누를 때마다 +1 (중복 가능)
+  document.getElementById('ig-like-btn').addEventListener('click', () => igAddLike(false));
+
+  // 댓글 아이콘: 입력창 포커스
+  document.getElementById('ig-comment-btn').addEventListener('click', () => {
+    document.getElementById('ig-cmt').focus();
   });
 
-  // Touch swipe
-  let touchStartX = 0;
-  let touchEndX = 0;
-  const slider = document.querySelector('.gallery-slider');
+  // 공유 아이콘
+  document.getElementById('ig-share-btn').addEventListener('click', igShare);
 
-  slider.addEventListener('touchstart', (e) => {
-    touchStartX = e.changedTouches[0].screenX;
+  // 댓글 작성 폼
+  document.getElementById('ig-addcomment').addEventListener('submit', (e) => {
+    e.preventDefault();
+    igSubmitComment();
+  });
+
+  // 닉네임 기억
+  const savedNick = localStorage.getItem('ig-nick');
+  if (savedNick) document.getElementById('ig-nick').value = savedNick;
+
+  // 미디어 영역: 스와이프 + 더블탭 좋아요
+  const media = document.getElementById('ig-media');
+  let startX = 0, startY = 0, lastTap = 0;
+
+  media.addEventListener('touchstart', (e) => {
+    startX = e.changedTouches[0].screenX;
+    startY = e.changedTouches[0].screenY;
   }, { passive: true });
 
-  slider.addEventListener('touchend', (e) => {
-    touchEndX = e.changedTouches[0].screenX;
-    const diff = touchStartX - touchEndX;
-    if (Math.abs(diff) > 50) {
-      if (diff > 0) goToSlide(galleryIndex + 1);
-      else goToSlide(galleryIndex - 1);
+  media.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].screenX - startX;
+    const dy = e.changedTouches[0].screenY - startY;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+      goToSlide(galleryIndex + (dx < 0 ? 1 : -1));
+    } else if (Math.abs(dx) < 10 && Math.abs(dy) < 10) {
+      // 탭 → 더블탭 감지
+      const now = Date.now();
+      if (now - lastTap < 300) { igAddLike(true); lastTap = 0; }
+      else lastTap = now;
     }
   }, { passive: true });
+
+  // 데스크탑 더블클릭 좋아요
+  media.addEventListener('dblclick', () => igAddLike(true));
 
   updateGalleryUI();
 }
@@ -402,14 +446,114 @@ function goToSlide(index) {
 }
 
 function updateGalleryUI() {
-  const track = document.getElementById('gallery-track');
-  track.style.transform = `translateX(-${galleryIndex * 100}%)`;
+  const i = galleryIndex;
+  document.getElementById('ig-track').style.transform = `translateX(-${i * 100}%)`;
+  document.getElementById('ig-count').textContent = `${i + 1}/${GALLERY_COUNT}`;
+  document.getElementById('ig-likes-count').textContent = (igLikes[i] || 0).toLocaleString();
+  document.getElementById('ig-caption-text').textContent = igCaption(i);
+  // 좋아요 버튼 상태(이 사진에 내가 누른 적 있으면 빨강 유지)
+  document.getElementById('ig-like-btn').classList.toggle('liked', !!(igLiked && igLiked[i]));
+  igRenderComments();
+}
 
-  document.getElementById('gallery-counter').textContent = `${galleryIndex + 1} / ${GALLERY_COUNT}`;
+function igAddLike(fromDoubleTap) {
+  const i = galleryIndex;
+  igLikes[i] = (igLikes[i] || 0) + 1;
+  igLiked[i] = true;
+  igSaveState();
+  document.getElementById('ig-likes-count').textContent = igLikes[i].toLocaleString();
 
-  document.querySelectorAll('.gallery-dot').forEach((dot, i) => {
-    dot.classList.toggle('active', i === galleryIndex);
-  });
+  const btn = document.getElementById('ig-like-btn');
+  btn.classList.add('liked');
+  btn.classList.remove('pop'); void btn.offsetWidth; btn.classList.add('pop');
+
+  // 떠오르는 하트
+  const floater = document.createElement('span');
+  floater.className = 'ig-floater';
+  floater.textContent = '♥';
+  btn.style.position = 'relative';
+  btn.appendChild(floater);
+  setTimeout(() => floater.remove(), 1000);
+
+  // 더블탭이면 이미지 가운데 큰 하트
+  if (fromDoubleTap) {
+    const burst = document.getElementById('ig-burst');
+    burst.classList.remove('animate'); void burst.offsetWidth; burst.classList.add('animate');
+  }
+}
+
+function igRenderComments() {
+  const wrap = document.getElementById('ig-comments');
+  const list = igComments[galleryIndex] || [];
+  if (!list.length) {
+    wrap.innerHTML = '<p class="ig-empty">첫 댓글을 남겨보세요.</p>';
+    return;
+  }
+  wrap.innerHTML = list.map(c =>
+    `<p class="ig-comment"><span class="ig-cname">${igEscape(c.name)}</span>${igEscape(c.text)}</p>`
+  ).join('');
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function igSubmitComment() {
+  const nickEl = document.getElementById('ig-nick');
+  const cmtEl = document.getElementById('ig-cmt');
+  const name = nickEl.value.trim();
+  const text = cmtEl.value.trim();
+
+  if (!name) { showToast('닉네임을 입력해 주세요'); nickEl.focus(); return; }
+  if (!text) { showToast('댓글을 입력해 주세요'); cmtEl.focus(); return; }
+
+  igComments[galleryIndex].push({ name, text });
+  igSaveState();
+  localStorage.setItem('ig-nick', name); // 닉네임 기억
+  cmtEl.value = '';
+  igRenderComments();
+}
+
+function igEscape(s) {
+  return String(s).replace(/[&<>"']/g, (m) => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]
+  ));
+}
+
+async function igShare() {
+  const i = galleryIndex;
+  const rel = `images/gallery-${String(i + 1).padStart(2, '0')}.jpg`;
+  const abs = siteBase() + '/' + rel;
+  const title = '우빈 ♡ 여울 Wedding';
+  const text = `우빈 ♡ 여울의 웨딩 사진 (${i + 1}/${GALLERY_COUNT})`;
+
+  // 1) 이미지 파일 자체 공유 시도
+  if (navigator.canShare) {
+    try {
+      const res = await fetch(rel);
+      const blob = await res.blob();
+      const file = new File([blob], `wedding-${i + 1}.jpg`, { type: blob.type || 'image/jpeg' });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title, text });
+        return;
+      }
+    } catch (e) {
+      if (e && e.name === 'AbortError') return; // 사용자가 취소
+    }
+  }
+  // 2) URL 공유
+  if (navigator.share) {
+    try {
+      await navigator.share({ title, text, url: abs });
+      return;
+    } catch (e) {
+      if (e && e.name === 'AbortError') return;
+    }
+  }
+  // 3) 링크 복사 폴백
+  try {
+    await navigator.clipboard.writeText(abs);
+    showToast('사진 링크가 복사되었습니다');
+  } catch {
+    showToast('공유를 지원하지 않는 환경입니다');
+  }
 }
 
 /* ===========================
