@@ -29,12 +29,17 @@ async function loadGuest() {
     };
   }
 
+  // 표시 이름 결정: 직접 제출한 이름(있으면) > URL/guests.json 이름
+  const savedName = localStorage.getItem('rsvp-name') || '';
+  const realName = (currentGuest.name && currentGuest.name !== '소중한 분') ? currentGuest.name : '';
+  const inputName = savedName || realName; // 입력칸 기본값(폴백 문구는 넣지 않음)
+
   // Apply guest data to UI
   document.getElementById('landing-name').textContent = currentGuest.name;
   document.getElementById('landing-msg').textContent = currentGuest.msg;
-  document.getElementById('rsvp-name').value = currentGuest.name;
-  document.getElementById('rsvp-section-name').textContent = currentGuest.name;
-  document.getElementById('tc-name').value = currentGuest.name;
+  document.getElementById('rsvp-name').value = inputName;
+  document.getElementById('rsvp-section-name').textContent = inputName || '소중한 분';
+  document.getElementById('tc-name').value = inputName;
 
   // Set RSVP side toggle
   if (currentGuest.side === 'bride') {
@@ -240,6 +245,9 @@ async function submitRSVP() {
     });
 
     localStorage.setItem('rsvp-submitted', 'true');
+    localStorage.setItem('rsvp-name', nameVal); // 제출한 이름 저장
+    // 입력한 이름을 화면에 반영 (하단 RSVP 섹션 인사말)
+    document.getElementById('rsvp-section-name').textContent = nameVal;
     document.getElementById('rsvp-form-content').style.display = 'none';
     document.getElementById('rsvp-thankyou').style.display = '';
     showRSVPCompleted();
