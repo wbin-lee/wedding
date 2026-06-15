@@ -18,7 +18,7 @@ const WEDDING = {
 
 // Google Apps Script 웹앱 URL (배포 후 생성되는 URL로 교체)
 // 설정 방법: scripts/google-apps-script.js 파일 참고
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz7eWBH0dAueyZEjcivPjJFp8KTrTuv00SY5f-Y5YxwNy0VGT17nfopbXZ29ap9pKg/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzX2IPBQYBEDEGFp5tYmwoiYgMEKT_cNECgM4cG_lth8mEtQxv8cu8s1n04KcYPiAxQ/exec';
 
 // ===========================
 // 카카오톡 공유 설정
