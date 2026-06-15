@@ -659,9 +659,12 @@ function showToast(msg) {
    Init
    =========================== */
 document.addEventListener('DOMContentLoaded', async () => {
-  // 카카오 공유 "일정 추가하기" 버튼 → 기본 브라우저에서 구글 캘린더로 이동
+  // 카카오 공유 "일정 추가하기" 버튼 처리
   if (new URLSearchParams(location.search).get('action') === 'calendar') {
-    location.replace(getCalendarUrl());
+    const isMobile = /android|iphone|ipad|ipod/i.test(navigator.userAgent);
+    // 모바일: .ics → 기본 캘린더 앱(안드로이드=구글 캘린더 / 아이폰=Apple 캘린더)
+    // PC: 구글 캘린더 웹 일정 등록 페이지
+    location.replace(isMobile ? siteBase() + '/wedding.ics' : getCalendarUrl());
     return;
   }
 

@@ -1,0 +1,15 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Woobin Yeoul Wedding//KR
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:wedding-20261101@woobin-yeoul.vercel.app
+DTSTAMP:20260615T000000Z
+DTSTART:20261101T060000Z
+DTEND:20261101T080000Z
+SUMMARY:이우빈 ♡ 이여울 결혼식
+LOCATION:엘타워 6F 그레이스홀 (서울특별시 서초구 강남대로 213)
+DESCRIPTION:이우빈 · 이여울의 결혼식에 초대합니다.\n청첩장: https://woobin-yeoul.vercel.app
+END:VEVENT
+END:VCALENDAR
