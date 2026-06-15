@@ -628,9 +628,18 @@ body {
 /* ===========================
    Section 5: Gallery (Instagram UI)
    =========================== */
-.section-gallery { background: #000; }
-/* 갤러리는 화면 꽉 차게: 섹션 여백 제거 */
-.ig-section-inner { padding: 0; max-width: none; width: 100%; height: 100dvh; margin: 0; }
+.section-gallery { background: #fafafa; }
+/* 모바일: 화면 꽉 차게(섹션 여백 제거) / 데스크탑: 가운데 카드형(아래 미디어쿼리) */
+.ig-section-inner {
+  padding: 0;
+  max-width: none;
+  width: 100%;
+  height: 100dvh;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 .ig-post {
   background: #fff;
@@ -1111,6 +1120,22 @@ body.weather-night {
   .hero-names { font-size: 2.8rem; }
   .invitation-quote { font-size: 1.7rem; }
   .landing-line { font-size: 1.15rem; }
+
+  /* 갤러리: 데스크탑에서는 가운데 카드형으로 너비 제한 */
+  .ig-post {
+    width: 100%;
+    max-width: 430px;
+    height: auto;
+    max-height: calc(100dvh - 40px);
+    border: 1px solid #dbdbdb;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .ig-media {
+    flex: 0 0 auto;       /* 데스크탑에서는 정사각 고정 */
+    aspect-ratio: 1 / 1;
+  }
+  .ig-comments { max-height: 22vh; }
 }
 
 @media (min-width: 1280px) {
