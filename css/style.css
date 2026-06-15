@@ -24,6 +24,7 @@
 
 html {
   scroll-behavior: smooth;
+  font-size: 15px; /* 전체 rem 기준 축소 (기본 16px → 15px) */
 }
 
 body {
@@ -94,6 +95,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow-y: auto;
   transition: opacity 0.8s ease, visibility 0.8s;
 }
 .landing.hidden {
@@ -137,7 +139,8 @@ body {
   z-index: 1;
   text-align: center;
   color: var(--text-light);
-  padding: 24px;
+  padding: 48px 24px;
+  margin: auto;
   max-width: 480px;
 }
 
@@ -334,10 +337,12 @@ body {
   scroll-snap-type: y mandatory;
   overflow-y: scroll;
   height: 100vh;
+  height: 100dvh; /* 모바일 주소창 영역 제외한 실제 화면 높이 */
 }
 
 .section {
   min-height: 100vh;
+  min-height: 100dvh;
   scroll-snap-align: start;
   display: flex;
   align-items: center;
@@ -355,7 +360,7 @@ body {
 .section-inner {
   width: 100%;
   max-width: var(--max-width);
-  margin: 0 auto;
+  margin: auto;
   padding: var(--section-padding);
   text-align: center;
   position: relative;
@@ -577,6 +582,9 @@ body {
    Section 4: Location
    =========================== */
 .section-location { background: var(--bg-main); }
+/* Location은 내용이 많아 섹션 세로 여백을 줄여 한 화면에 맞춤 */
+.section-location .section-inner { padding-top: 32px; padding-bottom: 32px; }
+.section-location .section-title { margin-bottom: 20px; }
 .location-venue {
   font-size: 1.1rem;
   font-weight: 700;
@@ -585,30 +593,37 @@ body {
 .location-address {
   font-size: 0.85rem;
   color: var(--text-muted);
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 }
 .map-container {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   border-radius: 12px;
   overflow: hidden;
+}
+.map-container iframe {
+  display: block;
+  width: 100%;
+  height: clamp(170px, 26vh, 240px);
+  border: 0;
+  border-radius: 12px;
 }
 .map-buttons {
   display: flex;
   gap: 8px;
   justify-content: center;
-  margin-bottom: 28px;
+  margin-bottom: 16px;
   flex-wrap: wrap;
 }
 .location-info {
   text-align: left;
   font-size: 0.85rem;
-  line-height: 1.8;
+  line-height: 1.6;
   color: #555;
   background: #fff;
   border-radius: 12px;
-  padding: 20px;
+  padding: 14px 16px;
 }
-.location-info p { margin-bottom: 12px; }
+.location-info p { margin-bottom: 8px; }
 .location-info p:last-child { margin-bottom: 0; }
 
 /* ===========================
@@ -724,7 +739,8 @@ body {
 .account-actions {
   display: flex;
   gap: 6px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  align-items: stretch;
 }
 .btn-account {
   padding: 8px 14px;
@@ -733,15 +749,24 @@ body {
   background: #fafafa;
   font-family: var(--font-body);
   font-size: 0.78rem;
+  white-space: nowrap;
   cursor: pointer;
   transition: background 0.2s;
 }
 .btn-account:hover { background: #eee; }
+/* 계좌번호 복사 버튼: 남는 공간을 채우며 좁으면 줄어듦 */
+.btn-account:not(.btn-kakao):not(.btn-toss) {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .btn-kakao, .btn-toss {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 6px;
+  flex: 0 0 auto;
   text-decoration: none;
 }
 .btn-kakao img, .btn-toss img {
@@ -811,6 +836,7 @@ body {
   background: #111;
   color: var(--text-light);
   min-height: 100vh;
+  min-height: 100dvh;
 }
 .footer-bg {
   position: absolute;
