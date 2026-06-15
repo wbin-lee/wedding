@@ -624,19 +624,24 @@ function shareKakao() {
   // "일정 추가하기"도 기본 브라우저에서 열리도록 우리 사이트(?action=calendar)를 경유
   const calendarUrl = siteBase() + '/?action=calendar';
 
-  Kakao.Share.sendDefault({
-    objectType: 'feed',
-    content: {
-      title: `${WEDDING.groom} ♡ ${WEDDING.bride}, 우리 결혼합니다 💍`,
-      description: `${WEDDING.dateKo}\n${WEDDING.venue}`,
-      imageUrl: siteBase() + '/images/hero.jpg',
-      link: { mobileWebUrl: invitationUrl, webUrl: invitationUrl },
-    },
-    buttons: [
-      { title: '일정 추가하기', link: { mobileWebUrl: calendarUrl, webUrl: calendarUrl } },
-      { title: '청첩장 보러가기', link: { mobileWebUrl: invitationUrl, webUrl: invitationUrl } },
-    ],
-  });
+  try {
+    Kakao.Share.sendDefault({
+      objectType: 'feed',
+      content: {
+        title: `${WEDDING.groom} ♡ ${WEDDING.bride}, 우리 결혼합니다 💍`,
+        description: `${WEDDING.dateKo}\n${WEDDING.venue}`,
+        imageUrl: siteBase() + '/images/hero.jpg',
+        link: { mobileWebUrl: invitationUrl, webUrl: invitationUrl },
+      },
+      buttons: [
+        { title: '일정 추가하기', link: { mobileWebUrl: calendarUrl, webUrl: calendarUrl } },
+        { title: '청첩장 보러가기', link: { mobileWebUrl: invitationUrl, webUrl: invitationUrl } },
+      ],
+    });
+  } catch (e) {
+    // PC에서 팝업이 차단되면 SDK가 focus 단계에서 실패함
+    showToast('팝업이 차단되었어요. 브라우저에서 팝업을 허용한 뒤 다시 시도해 주세요.');
+  }
 }
 
 /* ===========================
