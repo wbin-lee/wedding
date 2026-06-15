@@ -356,17 +356,64 @@ const IG_CAPTIONS = [
 
 function igCaption(i) { return IG_CAPTIONS[i % IG_CAPTIONS.length]; }
 
+// 즉시 표시용 로컬 캐시(오프라인/첫 페인트). 실제 원본은 서버(Google Sheet).
 function igLoadState() {
-  try { igLikes = JSON.parse(localStorage.getItem('ig-likes')) || []; } catch { igLikes = []; }
-  try { igComments = JSON.parse(localStorage.getItem('ig-comments')) || []; } catch { igComments = []; }
+  igLikes = []; igComments = [];
+  try {
+    const c = JSON.parse(localStorage.getItem('ig-cache'));
+    if (c) { igLikes = c.likes || []; igComments = c.comments || []; }
+  } catch {}
   for (let i = 0; i < GALLERY_COUNT; i++) {
-    if (typeof igLikes[i] !== 'number') igLikes[i] = 18 + ((i * 13) % 84); // 보기 좋은 기본 좋아요 수
+    if (typeof igLikes[i] !== 'number') igLikes[i] = 0;
     if (!Array.isArray(igComments[i])) igComments[i] = [];
   }
 }
-function igSaveState() {
-  localStorage.setItem('ig-likes', JSON.stringify(igLikes));
-  localStorage.setItem('ig-comments', JSON.stringify(igComments));
+function igCacheSave() {
+  try { localStorage.setItem('ig-cache', JSON.stringify({ likes: igLikes, comments: igComments })); } catch {}
+}
+
+function igConfigured() {
+  return typeof APPS_SCRIPT_URL === 'string' && /^https:\/\/script\.google\.com/.test(APPS_SCRIPT_URL);
+}
+
+// 서버로 전송 (fire-and-forget)
+function igPost(payload) {
+  if (!igConfigured()) return;
+  try {
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  } catch {}
+}
+
+// 서버에서 좋아요/댓글 전체 조회 → 화면 갱신 (모든 하객 공유)
+async function igFetchData() {
+  if (!igConfigured()) return;
+  try {
+    const res = await fetch(APPS_SCRIPT_URL + '?action=gallery&t=' + Date.now());
+    const data = await res.json();
+
+    for (let i = 0; i < GALLERY_COUNT; i++) {
+      igLikes[i] = (data.likes && data.likes[i] != null) ? Number(data.likes[i]) : 0;
+    }
+    const grouped = [];
+    for (let i = 0; i < GALLERY_COUNT; i++) grouped[i] = [];
+    (data.comments || []).forEach((c) => {
+      const p = Number(c.photo);
+      if (p >= 0 && p < GALLERY_COUNT) grouped[p].push({ name: c.name, text: c.text });
+    });
+    igComments = grouped;
+
+    igCacheSave();
+    // 현재 보고 있는 사진 갱신
+    document.getElementById('ig-likes-count').textContent = (igLikes[galleryIndex] || 0).toLocaleString();
+    igRenderComments();
+  } catch {
+    // 오프라인/CORS 실패 → 캐시 유지
+  }
 }
 
 function initGallery() {
@@ -447,6 +494,10 @@ function initGallery() {
   media.addEventListener('dblclick', () => igAddLike(true));
 
   updateGalleryUI();
+
+  // 서버에서 공유 데이터 불러오기 + 주기적 갱신(15초)
+  igFetchData();
+  setInterval(igFetchData, 15000);
 }
 
 function goToSlide(index) {
@@ -497,9 +548,10 @@ function updateIgPager() {
 
 function igAddLike(fromDoubleTap) {
   const i = galleryIndex;
-  igLikes[i] = (igLikes[i] || 0) + 1;
+  igLikes[i] = (igLikes[i] || 0) + 1; // 즉시 반영(낙관적), 서버 폴링으로 정정
   igLiked[i] = true;
-  igSaveState();
+  igCacheSave();
+  igPost({ type: 'like', photo: i });
   document.getElementById('ig-likes-count').textContent = igLikes[i].toLocaleString();
 
   const btn = document.getElementById('ig-like-btn');
@@ -543,8 +595,9 @@ function igSubmitComment() {
   if (!name) { showToast('닉네임을 입력해 주세요'); nickEl.focus(); return; }
   if (!text) { showToast('댓글을 입력해 주세요'); cmtEl.focus(); return; }
 
-  igComments[galleryIndex].push({ name, text });
-  igSaveState();
+  igComments[galleryIndex].push({ name, text }); // 즉시 반영(낙관적)
+  igCacheSave();
+  igPost({ type: 'comment', photo: galleryIndex, name, text });
   localStorage.setItem('ig-nick', name); // 닉네임 기억
   cmtEl.value = '';
   igRenderComments();
