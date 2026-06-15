@@ -672,7 +672,6 @@ body {
 .ig-usermeta { display: flex; flex-direction: column; line-height: 1.2; flex: 1 1 auto; min-width: 0; }
 .ig-username { font-weight: 600; font-size: 0.82rem; }
 .ig-sub { font-size: 0.72rem; color: #8e8e8e; }
-.ig-more { border: none; background: none; font-size: 1.1rem; cursor: pointer; color: #262626; padding: 4px; }
 
 /* Media carousel */
 .ig-media {
