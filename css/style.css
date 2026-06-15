@@ -628,7 +628,7 @@ body {
 /* ===========================
    Section 5: Gallery (Instagram UI)
    =========================== */
-.section-gallery { background: #fafafa; }
+.section-gallery { background: #fff; }
 /* 모바일: 화면 꽉 차게(섹션 여백 제거) / 데스크탑: 가운데 카드형(아래 미디어쿼리) */
 .ig-section-inner {
   padding: 0;
