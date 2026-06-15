@@ -629,20 +629,20 @@ body {
 /* ===========================
    Section 5: Gallery (Instagram UI)
    =========================== */
-.section-gallery { background: #fafafa; }
-.ig-section-inner { padding-top: 24px; padding-bottom: 24px; max-width: 440px; }
+.section-gallery { background: #000; }
+/* 갤러리는 화면 꽉 차게: 섹션 여백 제거 */
+.ig-section-inner { padding: 0; max-width: none; width: 100%; height: 100dvh; margin: 0; }
 
 .ig-post {
   background: #fff;
-  border: 1px solid #dbdbdb;
-  border-radius: 10px;
   overflow: hidden;
   text-align: left;
   color: #262626;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
   display: flex;
   flex-direction: column;
-  max-height: calc(100dvh - 48px);
+  width: 100%;
+  height: 100dvh;
 }
 
 /* Header */
@@ -678,11 +678,10 @@ body {
 .ig-media {
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1;
-  max-height: 56vh;
   background: #000;
   overflow: hidden;
-  flex: 0 1 auto;
+  flex: 1 1 auto;
+  min-height: 0;
   touch-action: pan-y;
 }
 .ig-track { display: flex; height: 100%; transition: transform 0.35s ease; }
@@ -749,6 +748,30 @@ body {
   100% { transform: translate(-50%, -55%) scale(1);   opacity: 0; }
 }
 
+/* Carousel page dots */
+.ig-pager {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  margin: 8px auto 2px;
+}
+.ig-pager-track {
+  display: flex;
+  align-items: center;
+  transition: transform 0.3s ease;
+}
+.ig-pdot {
+  width: 6px;
+  height: 6px;
+  margin: 0 2px;
+  border-radius: 50%;
+  background: #c7c7c7;
+  flex: 0 0 auto;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+.ig-pdot.active { background: #0095f6; }
+
 /* Action bar */
 .ig-actions {
   display: flex;
@@ -810,8 +833,9 @@ body {
 .ig-comments {
   padding: 0 12px;
   overflow-y: auto;
-  flex: 1 1 auto;
-  min-height: 28px;
+  flex: 0 1 auto;
+  max-height: 18vh;
+  min-height: 24px;
 }
 .ig-comment {
   font-size: 0.82rem;

@@ -344,6 +344,7 @@ function startDDayTimer() {
 let igLikes = [];     // 사진별 좋아요 수
 let igComments = [];  // 사진별 댓글 배열 [{name, text}]
 let igLiked = [];     // 이 기기에서 내가 좋아요한 사진(빨강 유지용)
+const IG_DOT_STEP = 10; // 점 하나가 차지하는 폭(6px + margin 2px*2)
 
 const IG_CAPTIONS = [
   '함께라서 더 빛나는 순간 ✨ #우빈여울 #웨딩 #2026',
@@ -385,6 +386,16 @@ function initGallery() {
     };
     track.appendChild(img);
   }
+
+  // 캐러셀 페이지 점
+  const pagerTrack = document.getElementById('ig-pager-track');
+  for (let i = 0; i < GALLERY_COUNT; i++) {
+    const d = document.createElement('span');
+    d.className = 'ig-pdot';
+    pagerTrack.appendChild(d);
+  }
+  // 보이는 점 창 너비 (최대 7개)
+  document.getElementById('ig-pager').style.width = (Math.min(GALLERY_COUNT, 7) * IG_DOT_STEP) + 'px';
 
   document.querySelector('.ig-prev').addEventListener('click', () => goToSlide(galleryIndex - 1));
   document.querySelector('.ig-next').addEventListener('click', () => goToSlide(galleryIndex + 1));
@@ -453,7 +464,35 @@ function updateGalleryUI() {
   document.getElementById('ig-caption-text').textContent = igCaption(i);
   // 좋아요 버튼 상태(이 사진에 내가 누른 적 있으면 빨강 유지)
   document.getElementById('ig-like-btn').classList.toggle('liked', !!(igLiked && igLiked[i]));
+  updateIgPager();
   igRenderComments();
+}
+
+// 인스타식 페이지 점: 활성 점을 창 중앙에 두고, 가장자리 점은 작게
+function updateIgPager() {
+  const track = document.getElementById('ig-pager-track');
+  if (!track) return;
+  const dots = track.children;
+  const n = dots.length;
+  const step = IG_DOT_STEP;
+  const pagerW = Math.min(n, 7) * step;
+  const trackW = n * step;
+
+  let tx = pagerW / 2 - (galleryIndex * step + step / 2);
+  tx = Math.max(Math.min(tx, 0), pagerW - trackW); // 양끝에서 멈춤
+  track.style.transform = `translateX(${tx}px)`;
+
+  for (let i = 0; i < n; i++) {
+    const el = dots[i];
+    el.classList.toggle('active', i === galleryIndex);
+    // 창(window) 중앙으로부터의 거리에 따라 크기 조절
+    const posInWindow = (i * step + step / 2) + tx;
+    const dist = Math.abs(posInWindow - pagerW / 2);
+    let scale = 1;
+    if (dist > step * 2.5) scale = 0.34;
+    else if (dist > step * 1.5) scale = 0.66;
+    el.style.transform = `scale(${scale})`;
+  }
 }
 
 function igAddLike(fromDoubleTap) {
