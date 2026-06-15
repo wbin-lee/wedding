@@ -223,6 +223,19 @@ body {
 .btn-map:hover { background: #f0f0f0; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+.btn-kakao-share {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 22px;
+  background: #fee500;
+  color: #191600;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+}
+.btn-kakao-share:hover { background: #ffe200; }
+.btn-kakao-share .kakao-bubble { font-size: 1rem; }
+
 /* ===========================
    Modal
    =========================== */

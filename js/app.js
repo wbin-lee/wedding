@@ -577,6 +577,69 @@ async function submitTimeCapsule() {
 }
 
 /* ===========================
+   Kakao Share (공유 카드 + 버튼)
+   =========================== */
+function siteBase() {
+  return SITE_URL.replace(/\/$/, '');
+}
+
+// 현재 보고 있는 청첩장 절대 URL (name 파라미터 보존)
+function getInvitationUrl() {
+  const search = location.search.replace(/[?&]action=calendar/, '');
+  return siteBase() + '/' + (search && search !== '?' ? search : '');
+}
+
+// 구글 캘린더 "일정 추가" 링크
+// 결혼식: 2026-11-01 15:00~17:00 KST (= 06:00~08:00 UTC)
+function getCalendarUrl() {
+  const text = `${WEDDING.groom} ♡ ${WEDDING.bride} 결혼식`;
+  const details = `${WEDDING.groom} · ${WEDDING.bride}의 결혼식에 초대합니다.\n\n청첩장: ${getInvitationUrl()}`;
+  const loc = `${WEDDING.venue} (${WEDDING.address})`;
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text,
+    dates: '20261101T060000Z/20261101T080000Z',
+    details,
+    location: loc,
+  });
+  return 'https://calendar.google.com/calendar/render?' + params.toString();
+}
+
+function initKakaoShare() {
+  if (typeof Kakao === 'undefined') return;
+  if (!Kakao.isInitialized()) {
+    if (!KAKAO_JS_KEY || KAKAO_JS_KEY === 'YOUR_KAKAO_JS_KEY') return; // 키 미설정 시 비활성
+    Kakao.init(KAKAO_JS_KEY);
+  }
+  const btn = document.getElementById('btn-kakao-share');
+  if (btn) btn.addEventListener('click', shareKakao);
+}
+
+function shareKakao() {
+  if (typeof Kakao === 'undefined' || !Kakao.isInitialized()) {
+    showToast('카카오 공유 설정이 필요합니다');
+    return;
+  }
+  const invitationUrl = getInvitationUrl();
+  // "일정 추가하기"도 기본 브라우저에서 열리도록 우리 사이트(?action=calendar)를 경유
+  const calendarUrl = siteBase() + '/?action=calendar';
+
+  Kakao.Share.sendDefault({
+    objectType: 'feed',
+    content: {
+      title: `${WEDDING.groom} ♡ ${WEDDING.bride}, 우리 결혼합니다 💍`,
+      description: `${WEDDING.dateKo}\n${WEDDING.venue}`,
+      imageUrl: siteBase() + '/images/hero.jpg',
+      link: { mobileWebUrl: invitationUrl, webUrl: invitationUrl },
+    },
+    buttons: [
+      { title: '일정 추가하기', link: { mobileWebUrl: calendarUrl, webUrl: calendarUrl } },
+      { title: '청첩장 보러가기', link: { mobileWebUrl: invitationUrl, webUrl: invitationUrl } },
+    ],
+  });
+}
+
+/* ===========================
    Toast
    =========================== */
 function showToast(msg) {
@@ -591,7 +654,14 @@ function showToast(msg) {
    Init
    =========================== */
 document.addEventListener('DOMContentLoaded', async () => {
+  // 카카오 공유 "일정 추가하기" 버튼 → 기본 브라우저에서 구글 캘린더로 이동
+  if (new URLSearchParams(location.search).get('action') === 'calendar') {
+    location.replace(getCalendarUrl());
+    return;
+  }
+
   await loadGuest();
+  initKakaoShare();
   initBGM();
   initLanding();
   initRSVP();
