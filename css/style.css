@@ -1045,7 +1045,7 @@ body {
 .footer-bg {
   position: absolute;
   inset: 0;
-  background: url('../images/footer.jpg') center/cover no-repeat;
+  background: url('../images/footer.jpg') center/cover no-repeat #111;
 }
 .footer-content { z-index: 2; }
 .footer-quote {
@@ -1136,6 +1136,9 @@ body.weather-night {
     aspect-ratio: 1 / 1;
   }
   .ig-comments { max-height: 22vh; }
+
+  /* Footer: 넓은 화면에서는 세로 사진을 자르지 않고 전체 표시 */
+  .footer-bg { background-size: contain; }
 }
 
 @media (min-width: 1280px) {
