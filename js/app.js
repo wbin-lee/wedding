@@ -1,7 +1,7 @@
 /* ===========================
    Global State
    =========================== */
-let currentGuest = null;
+let guestList = [];   // data/guests.json — 제출 시 개인 메시지 매칭용
 let userPausedManually = false;
 let bgm = null;
 let galleryIndex = 0;
@@ -9,47 +9,37 @@ let galleryIndex = 0;
 /* ===========================
    Guest Loading
    =========================== */
-async function loadGuest() {
-  const params = new URLSearchParams(window.location.search);
-  const nameParam = decodeURIComponent(params.get('name') || '');
-
+async function loadGuests() {
+  // 하객 목록(개인 메시지)을 미리 받아두고, 제출 시 이름+측으로 매칭한다.
   try {
     const res = await fetch('data/guests.json');
-    const guests = await res.json();
-    currentGuest = guests.find(g => g.name === nameParam) ?? {
-      name: nameParam || '소중한 분',
-      msg: '함께해 주셔서 감사합니다.',
-      side: 'groom',
-    };
+    guestList = await res.json();
+    if (!Array.isArray(guestList)) guestList = [];
   } catch {
-    currentGuest = {
-      name: nameParam || '소중한 분',
-      msg: '함께해 주셔서 감사합니다.',
-      side: 'groom',
-    };
+    guestList = [];
   }
 
-  // 표시 이름 결정: 직접 제출한 이름(있으면) > URL/guests.json 이름
+  // 이전에 제출한 이름이 있으면 입력칸/하단 인사말에 채워준다.
   const savedName = localStorage.getItem('rsvp-name') || '';
-  const realName = (currentGuest.name && currentGuest.name !== '소중한 분') ? currentGuest.name : '';
-  const inputName = savedName || realName; // 입력칸 기본값(폴백 문구는 넣지 않음)
+  document.getElementById('rsvp-name').value = savedName;
+  document.getElementById('rsvp-section-name').textContent = savedName || '소중한 분';
+  document.getElementById('tc-name').value = savedName;
 
-  // Apply guest data to UI
-  document.getElementById('landing-name').textContent = currentGuest.name;
-  document.getElementById('landing-msg').textContent = currentGuest.msg;
-  document.getElementById('rsvp-name').value = inputName;
-  document.getElementById('rsvp-section-name').textContent = inputName || '소중한 분';
-  document.getElementById('tc-name').value = inputName;
-
-  // Set RSVP side toggle
-  if (currentGuest.side === 'bride') {
-    setToggle('rsvp-side', 'bride');
-  }
-
-  // Check if already submitted RSVP
+  // 이미 제출한 경우 완료 상태 표시
   if (localStorage.getItem('rsvp-submitted')) {
     showRSVPCompleted();
   }
+}
+
+/**
+ * 제출한 이름+측+참석여부로 guests.json에서 개인 메시지를 찾는다.
+ * @returns {string|null} 개인 메시지(없으면 null)
+ */
+function findGuestMessage(name, side, attend) {
+  const g = guestList.find(x => String(x.name).trim() === String(name).trim() && x.side === side);
+  if (!g) return null;
+  if (attend === 'yes') return g.msgAttend || g.msg || null;
+  return g.msgAbsent || g.msg || null;
 }
 
 /* ===========================
@@ -226,10 +216,13 @@ async function submitRSVP() {
   btn.disabled = true;
   btn.textContent = '전송 중...';
 
+  const sideVal = getToggleValue('rsvp-side');
+  const attendVal = getToggleValue('rsvp-attend');
+
   const data = {
     type: 'rsvp',
-    side: getToggleValue('rsvp-side'),
-    attend: getToggleValue('rsvp-attend'),
+    side: sideVal,
+    attend: attendVal,
     meal: getToggleValue('rsvp-meal'),
     name: nameVal,
     phone: phoneVal,
@@ -248,6 +241,19 @@ async function submitRSVP() {
     localStorage.setItem('rsvp-name', nameVal); // 제출한 이름 저장
     // 입력한 이름을 화면에 반영 (하단 RSVP 섹션 인사말)
     document.getElementById('rsvp-section-name').textContent = nameVal;
+
+    // guests.json에 등록된 분이면 참석여부에 맞는 개인 메시지를 띄운다.
+    const personalMsg = findGuestMessage(nameVal, sideVal, attendVal);
+    const textEl = document.getElementById('thankyou-text');
+    const subEl = document.getElementById('thankyou-sub');
+    if (personalMsg) {
+      textEl.textContent = personalMsg;
+      subEl.textContent = '— 신랑 이우빈 · 신부 이여울';
+    } else {
+      textEl.textContent = '소중한 마음 감사합니다';
+      subEl.textContent = '당일 기쁜 마음으로 맞이하겠습니다.';
+    }
+
     document.getElementById('rsvp-form-content').style.display = 'none';
     document.getElementById('rsvp-thankyou').style.display = '';
     showRSVPCompleted();
@@ -912,7 +918,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  await loadGuest();
+  await loadGuests();
   initKakaoShare();
   initBGM();
   initLanding();
