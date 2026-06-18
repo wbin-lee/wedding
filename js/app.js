@@ -1,7 +1,6 @@
 /* ===========================
    Global State
    =========================== */
-let guestList = [];   // data/guests.json — 제출 시 개인 메시지 매칭용
 let userPausedManually = false;
 let bgm = null;
 let galleryIndex = 0;
@@ -10,15 +9,6 @@ let galleryIndex = 0;
    Guest Loading
    =========================== */
 async function loadGuests() {
-  // 하객 목록(개인 메시지)을 미리 받아두고, 제출 시 이름+측으로 매칭한다.
-  try {
-    const res = await fetch('data/guests.json');
-    guestList = await res.json();
-    if (!Array.isArray(guestList)) guestList = [];
-  } catch {
-    guestList = [];
-  }
-
   // 이전에 제출한 이름이 있으면 입력칸/하단 인사말에 채워준다.
   const savedName = localStorage.getItem('rsvp-name') || '';
   document.getElementById('rsvp-name').value = savedName;
@@ -32,14 +22,24 @@ async function loadGuests() {
 }
 
 /**
- * 제출한 이름+측+참석여부로 guests.json에서 개인 메시지를 찾는다.
- * @returns {string|null} 개인 메시지(없으면 null)
+ * 서버(Apps Script)에서 이름+측+참석여부에 맞는 개인 메시지 1건을 조회한다.
+ * 개인 메시지는 시트에만 보관되고 본인 것만 응답으로 받는다.
+ * @returns {Promise<string|null>} 개인 메시지(없으면 null)
  */
-function findGuestMessage(name, side, attend) {
-  const g = guestList.find(x => String(x.name).trim() === String(name).trim() && x.side === side);
-  if (!g) return null;
-  if (attend === 'yes') return g.msgAttend || g.msg || null;
-  return g.msgAbsent || g.msg || null;
+async function fetchGuestMessage(name, side, attend) {
+  if (!igConfigured()) return null; // APPS_SCRIPT_URL 미설정 시 생략
+  try {
+    const url = APPS_SCRIPT_URL + '?action=guestmsg'
+      + '&name=' + encodeURIComponent(name)
+      + '&side=' + encodeURIComponent(side)
+      + '&attend=' + encodeURIComponent(attend)
+      + '&t=' + Date.now();
+    const res = await fetch(url);
+    const data = await res.json();
+    return data && data.msg ? String(data.msg) : null;
+  } catch {
+    return null;
+  }
 }
 
 /* ===========================
@@ -242,8 +242,8 @@ async function submitRSVP() {
     // 입력한 이름을 화면에 반영 (하단 RSVP 섹션 인사말)
     document.getElementById('rsvp-section-name').textContent = nameVal;
 
-    // guests.json에 등록된 분이면 참석여부에 맞는 개인 메시지를 띄운다.
-    const personalMsg = findGuestMessage(nameVal, sideVal, attendVal);
+    // 시트에 등록된 분이면 참석여부에 맞는 개인 메시지를 서버에서 받아 띄운다.
+    const personalMsg = await fetchGuestMessage(nameVal, sideVal, attendVal);
     const textEl = document.getElementById('thankyou-text');
     const subEl = document.getElementById('thankyou-sub');
     if (personalMsg) {

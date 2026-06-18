@@ -14,6 +14,11 @@
  * 3. TimeCapsule 시트 헤더(1행):
  *    A1: 접수시간 | B1: 성함 | C1: 메시지
  *
+ * 3-1. (개인 메시지 기능) "Guests" 시트를 만들고 헤더(1행):
+ *    A1: 이름 | B1: 측 | C1: 참석메시지 | D1: 불참메시지
+ *    - B열(측)은 'groom'/'bride' 또는 '신랑측'/'신부측' 모두 인식
+ *    - 이름·메시지는 이 시트에만 보관되고 외부로 전체 공개되지 않음(본인 것만 응답)
+ *
  * 4. [확장 프로그램] > [Apps Script] → 기존 코드 전체 삭제 후 이 파일 내용 붙여넣기.
  *
  * 5. [배포] > [새 배포]
@@ -79,10 +84,16 @@ function doPost(e) {
 }
 
 /**
- * 갤러리 데이터 조회 (모든 하객이 같은 좋아요/댓글을 보도록 읽기 제공)
- * 응답: { likes: { "0": 3, "1": 7, ... }, comments: [ { photo, name, text }, ... ] }
+ * GET 라우팅
+ *  - action=guestmsg : 이름+측+참석여부로 개인 메시지 1건만 반환 (개인정보 비공개 유지)
+ *  - 그 외(기본)      : 갤러리 좋아요/댓글 전체 반환
  */
 function doGet(e) {
+  var action = (e && e.parameter && e.parameter.action) || 'gallery';
+  if (action === 'guestmsg') {
+    return guestMessage(e);
+  }
+
   var ss = SpreadsheetApp.getActiveSpreadsheet();
 
   var likes = {};
@@ -107,6 +118,48 @@ function doGet(e) {
   return ContentService
     .createTextOutput(JSON.stringify({ likes: likes, comments: comments }))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+/**
+ * 개인 메시지 조회
+ * "Guests" 시트(A:이름 B:측 C:참석메시지 D:불참메시지)에서
+ * 이름 + 측이 일치하는 행을 찾아, 참석여부에 맞는 메시지 1건만 반환한다.
+ * 응답: { msg: "..." } (없으면 { msg: null })
+ *
+ * ⚠️ Guests 시트는 직접 만들어 주세요. (이름·메시지는 비공개로 시트에만 보관)
+ *   A1: 이름 | B1: 측 | C1: 참석메시지 | D1: 불참메시지
+ *   B열(측)에는 'groom'/'bride' 또는 '신랑측'/'신부측' 모두 인식합니다.
+ */
+function guestMessage(e) {
+  var name = String((e.parameter.name || '')).trim();
+  var side = normSide(e.parameter.side || '');
+  var attend = String((e.parameter.attend || '')).trim();
+  var msg = null;
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('Guests');
+  if (sheet && sheet.getLastRow() > 1) {
+    var rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, 4).getValues(); // A:이름 B:측 C:참석 D:불참
+    for (var i = 0; i < rows.length; i++) {
+      if (String(rows[i][0]).trim() === name && normSide(rows[i][1]) === side) {
+        var cell = (attend === 'yes') ? rows[i][2] : rows[i][3];
+        msg = (cell !== '' && cell != null) ? String(cell) : null;
+        break;
+      }
+    }
+  }
+
+  return ContentService
+    .createTextOutput(JSON.stringify({ msg: msg }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+/** 측 표기 정규화: 신랑/groom → 'groom', 신부/bride → 'bride' */
+function normSide(s) {
+  s = String(s).trim().toLowerCase();
+  if (s.indexOf('신랑') >= 0 || s === 'groom') return 'groom';
+  if (s.indexOf('신부') >= 0 || s === 'bride') return 'bride';
+  return s;
 }
 
 /** 시트가 없으면 헤더와 함께 생성해서 반환 */
