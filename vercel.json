@@ -1,0 +1,4 @@
+{
+  "buildCommand": "node scripts/build-guests.js",
+  "outputDirectory": "."
+}
