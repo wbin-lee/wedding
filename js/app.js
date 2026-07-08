@@ -855,6 +855,19 @@ function getCalendarUrl() {
   return 'https://calendar.google.com/calendar/render?' + params.toString();
 }
 
+function openCalendar() {
+  const ua = navigator.userAgent;
+  const isIOS = /iphone|ipad|ipod/i.test(ua);
+
+  if (isIOS) {
+    // iOS: .ics → Apple 캘린더 앱에서 바로 등록
+    location.replace(siteBase() + '/wedding.ics');
+  } else {
+    // Android·PC: Google Calendar 일정 추가 → 앱 또는 웹에서 바로 저장
+    location.replace(getCalendarUrl());
+  }
+}
+
 function initKakaoShare() {
   if (typeof Kakao === 'undefined') return;
   if (!Kakao.isInitialized()) {
@@ -911,10 +924,7 @@ function showToast(msg) {
 document.addEventListener('DOMContentLoaded', async () => {
   // 카카오 공유 "일정 추가하기" 버튼 처리
   if (new URLSearchParams(location.search).get('action') === 'calendar') {
-    const isMobile = /android|iphone|ipad|ipod/i.test(navigator.userAgent);
-    // 모바일: .ics → 기본 캘린더 앱(안드로이드=구글 캘린더 / 아이폰=Apple 캘린더)
-    // PC: 구글 캘린더 웹 일정 등록 페이지
-    location.replace(isMobile ? siteBase() + '/wedding.ics' : getCalendarUrl());
+    openCalendar();
     return;
   }
 
