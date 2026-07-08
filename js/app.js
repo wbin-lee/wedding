@@ -873,60 +873,17 @@ function getCalendarUrl() {
   return 'https://calendar.google.com/calendar/render?' + params.toString();
 }
 
-function getOutlookCalendarUrl() {
-  const text = `${WEDDING.groom} ♡ ${WEDDING.bride} 결혼식`;
-  const details = `${WEDDING.groom} · ${WEDDING.bride}의 결혼식에 초대합니다.\n\n청첩장: ${getInvitationUrl()}`;
-  const loc = `${WEDDING.venue} (${WEDDING.address})`;
-  const params = new URLSearchParams({
-    path: '/calendar/action/compose',
-    rru: 'addevent',
-    subject: text,
-    startdt: '2026-11-01T15:00:00',
-    enddt: '2026-11-01T17:00:00',
-    location: loc,
-    body: details,
-  });
-  return 'https://outlook.live.com/calendar/0/deeplink/compose?' + params.toString();
-}
+function openCalendar() {
+  const ua = navigator.userAgent;
+  const isIOS = /iphone|ipad|ipod/i.test(ua);
 
-let calendarPickerInited = false;
-
-function openCalendarApp(type) {
-  switch (type) {
-    case 'google':
-      window.location.href = getCalendarUrl();
-      break;
-    case 'apple':
-    case 'ics':
-      window.location.href = siteBase() + '/wedding.ics';
-      break;
-    case 'outlook':
-      window.location.href = getOutlookCalendarUrl();
-      break;
+  if (isIOS) {
+    // iOS: .ics → Apple 캘린더 앱에서 바로 등록
+    location.replace(siteBase() + '/wedding.ics');
+  } else {
+    // Android·PC: Google Calendar 일정 추가 → 앱 또는 웹에서 바로 저장
+    location.replace(getCalendarUrl());
   }
-}
-
-function initCalendarPicker() {
-  if (calendarPickerInited) return;
-  calendarPickerInited = true;
-
-  document.getElementById('calendar-picker-event').innerHTML =
-    `${WEDDING.groom} ♡ ${WEDDING.bride} 결혼식<br>${WEDDING.dateKo}<br>${WEDDING.venue}`;
-
-  const back = document.getElementById('calendar-picker-back');
-  back.href = getInvitationUrl();
-
-  document.querySelectorAll('.calendar-picker-item').forEach((btn) => {
-    btn.addEventListener('click', () => openCalendarApp(btn.dataset.cal));
-  });
-}
-
-function showCalendarPicker() {
-  document.getElementById('landing').style.display = 'none';
-  document.getElementById('main').style.display = 'none';
-  document.getElementById('bgm-btn').style.display = 'none';
-  document.getElementById('calendar-picker').style.display = '';
-  initCalendarPicker();
 }
 
 function initKakaoShare() {
@@ -985,7 +942,7 @@ function showToast(msg) {
 document.addEventListener('DOMContentLoaded', async () => {
   // 카카오 공유 "일정 추가하기" 버튼 처리
   if (new URLSearchParams(location.search).get('action') === 'calendar') {
-    showCalendarPicker();
+    openCalendar();
     return;
   }
 
