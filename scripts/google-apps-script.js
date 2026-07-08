@@ -36,6 +36,8 @@ function doPost(e) {
   var now = new Date();
   var timestamp = Utilities.formatDate(now, 'Asia/Seoul', 'yyyy-MM-dd HH:mm:ss');
 
+  var response = { result: 'ok' };
+
   if (data.type === 'rsvp') {
     var sheet = ss.getSheetByName('RSVP');
     var row = [
@@ -53,6 +55,8 @@ function doPost(e) {
     } else {
       sheet.appendRow(row);
     }
+    // RSVP 저장과 동시에 개인 메시지 조회 → 클라이언트 추가 요청 불필요
+    response.msg = lookupGuestMessage(data.name, data.side, data.attend);
   }
 
   if (data.type === 'timecapsule') {
@@ -79,7 +83,7 @@ function doPost(e) {
   }
 
   return ContentService
-    .createTextOutput(JSON.stringify({ result: 'ok' }))
+    .createTextOutput(JSON.stringify(response))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
@@ -132,26 +136,33 @@ function doGet(e) {
  */
 function guestMessage(e) {
   var name = String((e.parameter.name || '')).trim();
-  var side = normSide(e.parameter.side || '');
+  var side = e.parameter.side || '';
   var attend = String((e.parameter.attend || '')).trim();
-  var msg = null;
+  var msg = lookupGuestMessage(name, side, attend);
 
+  return ContentService
+    .createTextOutput(JSON.stringify({ msg: msg }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+/** Guests 시트에서 이름+측+참석여부에 맞는 개인 메시지 1건 조회 (없으면 null) */
+function lookupGuestMessage(name, side, attend) {
+  var msg = null;
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName('Guests');
   if (sheet && sheet.getLastRow() > 1) {
     var rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, 4).getValues(); // A:이름 B:측 C:참석 D:불참
+    var normName = String(name).trim();
+    var normSideVal = normSide(side);
     for (var i = 0; i < rows.length; i++) {
-      if (String(rows[i][0]).trim() === name && normSide(rows[i][1]) === side) {
+      if (String(rows[i][0]).trim() === normName && normSide(rows[i][1]) === normSideVal) {
         var cell = (attend === 'yes') ? rows[i][2] : rows[i][3];
         msg = (cell !== '' && cell != null) ? String(cell) : null;
         break;
       }
     }
   }
-
-  return ContentService
-    .createTextOutput(JSON.stringify({ msg: msg }))
-    .setMimeType(ContentService.MimeType.JSON);
+  return msg;
 }
 
 /** 측 표기 정규화: 신랑/groom → 'groom', 신부/bride → 'bride' */

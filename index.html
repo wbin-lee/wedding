@@ -47,6 +47,35 @@
     <span class="bgm-pulse"></span>
   </button>
 
+  <!-- ============ Calendar Picker (?action=calendar) ============ -->
+  <div id="calendar-picker" class="calendar-picker" style="display:none">
+    <div class="calendar-picker-inner">
+      <p class="calendar-picker-emoji">📅</p>
+      <h1 class="calendar-picker-title">일정 추가하기</h1>
+      <p class="calendar-picker-desc">사용하시는 캘린더 앱을 선택해 주세요</p>
+      <p class="calendar-picker-event" id="calendar-picker-event"></p>
+      <div class="calendar-picker-list">
+        <button type="button" class="calendar-picker-item" data-cal="google">
+          <span class="calendar-picker-name">Google 캘린더</span>
+          <span class="calendar-picker-hint">Android · PC</span>
+        </button>
+        <button type="button" class="calendar-picker-item" data-cal="apple">
+          <span class="calendar-picker-name">Apple 캘린더</span>
+          <span class="calendar-picker-hint">iPhone · iPad · Mac</span>
+        </button>
+        <button type="button" class="calendar-picker-item" data-cal="outlook">
+          <span class="calendar-picker-name">Outlook</span>
+          <span class="calendar-picker-hint">Microsoft 계정</span>
+        </button>
+        <button type="button" class="calendar-picker-item" data-cal="ics">
+          <span class="calendar-picker-name">기타 앱</span>
+          <span class="calendar-picker-hint">삼성 · 네이버 등 (.ics)</span>
+        </button>
+      </div>
+      <a class="calendar-picker-back" id="calendar-picker-back" href="/">청첩장으로 돌아가기</a>
+    </div>
+  </div>
+
   <!-- ============ Landing Screen ============ -->
   <div id="landing" class="landing">
     <div class="film-grain"></div>

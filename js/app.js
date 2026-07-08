@@ -21,27 +21,6 @@ async function loadGuests() {
   }
 }
 
-/**
- * 서버(Apps Script)에서 이름+측+참석여부에 맞는 개인 메시지 1건을 조회한다.
- * 개인 메시지는 시트에만 보관되고 본인 것만 응답으로 받는다.
- * @returns {Promise<string|null>} 개인 메시지(없으면 null)
- */
-async function fetchGuestMessage(name, side, attend) {
-  if (!igConfigured()) return null; // APPS_SCRIPT_URL 미설정 시 생략
-  try {
-    const url = APPS_SCRIPT_URL + '?action=guestmsg'
-      + '&name=' + encodeURIComponent(name)
-      + '&side=' + encodeURIComponent(side)
-      + '&attend=' + encodeURIComponent(attend)
-      + '&t=' + Date.now();
-    const res = await fetch(url);
-    const data = await res.json();
-    return data && data.msg ? String(data.msg) : null;
-  } catch {
-    return null;
-  }
-}
-
 /* ===========================
    BGM Player
    =========================== */
@@ -199,7 +178,68 @@ function setToggle(groupId, value) {
   });
 }
 
-async function submitRSVP() {
+function defaultRSVPSub(attendVal) {
+  return attendVal === 'yes'
+    ? '당일 기쁜 마음으로 맞이하겠습니다.'
+    : '멀리서라도 축하해 주시면 감사하겠습니다.';
+}
+
+function setRSVPThankYouText(attendVal, personalMsg) {
+  const textEl = document.getElementById('thankyou-text');
+  const subEl = document.getElementById('thankyou-sub');
+  if (personalMsg) {
+    textEl.textContent = personalMsg;
+    subEl.textContent = '— 신랑 이우빈 · 신부 이여울';
+  } else {
+    textEl.textContent = '소중한 마음 감사합니다';
+    subEl.textContent = defaultRSVPSub(attendVal);
+  }
+}
+
+function showRSVPThankYou(attendVal, personalMsg) {
+  setRSVPThankYouText(attendVal, personalMsg);
+  document.getElementById('rsvp-form-content').style.display = 'none';
+  document.getElementById('rsvp-thankyou').style.display = '';
+}
+
+/**
+ * GET으로 개인 메시지 조회 (Apps Script POST는 302 리다이렉트로 응답 JSON 파싱 불가)
+ * @returns {Promise<string|null>}
+ */
+async function fetchGuestMessage(name, side, attend) {
+  if (!igConfigured()) return null;
+  try {
+    const url = APPS_SCRIPT_URL + '?action=guestmsg'
+      + '&name=' + encodeURIComponent(name)
+      + '&side=' + encodeURIComponent(side)
+      + '&attend=' + encodeURIComponent(attend)
+      + '&t=' + Date.now();
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data && data.msg ? String(data.msg) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveRSVP(data) {
+  if (!igConfigured()) return;
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(data),
+  }).catch(() => {});
+}
+
+// 페이지 로드 시 Apps Script 콜드 스타트 완화 (제출 전 미리 워밍업)
+function warmAppsScript() {
+  if (!igConfigured()) return;
+  fetch(APPS_SCRIPT_URL + '?t=' + Date.now()).catch(() => {});
+}
+
+function submitRSVP() {
   const btn = document.getElementById('rsvp-submit');
   const nameVal = document.getElementById('rsvp-name').value.trim();
   const phoneVal = document.getElementById('rsvp-phone').value.trim();
@@ -212,9 +252,6 @@ async function submitRSVP() {
     showToast('연락처 뒷자리 4자리를 입력해 주세요');
     return;
   }
-
-  btn.disabled = true;
-  btn.textContent = '전송 중...';
 
   const sideVal = getToggleValue('rsvp-side');
   const attendVal = getToggleValue('rsvp-attend');
@@ -229,39 +266,20 @@ async function submitRSVP() {
     guests: document.getElementById('rsvp-guests').value,
   };
 
-  try {
-    await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
+  // 낙관적 UI: 서버 응답 전에 감사 화면을 먼저 표시
+  localStorage.setItem('rsvp-submitted', 'true');
+  localStorage.setItem('rsvp-name', nameVal);
+  document.getElementById('rsvp-section-name').textContent = nameVal;
+  showRSVPThankYou(attendVal, null);
+  showRSVPCompleted();
+  btn.disabled = false;
+  btn.textContent = '제출하기';
 
-    localStorage.setItem('rsvp-submitted', 'true');
-    localStorage.setItem('rsvp-name', nameVal); // 제출한 이름 저장
-    // 입력한 이름을 화면에 반영 (하단 RSVP 섹션 인사말)
-    document.getElementById('rsvp-section-name').textContent = nameVal;
-
-    // 시트에 등록된 분이면 참석여부에 맞는 개인 메시지를 서버에서 받아 띄운다.
-    const personalMsg = await fetchGuestMessage(nameVal, sideVal, attendVal);
-    const textEl = document.getElementById('thankyou-text');
-    const subEl = document.getElementById('thankyou-sub');
-    if (personalMsg) {
-      textEl.textContent = personalMsg;
-      subEl.textContent = '— 신랑 이우빈 · 신부 이여울';
-    } else {
-      textEl.textContent = '소중한 마음 감사합니다';
-      subEl.textContent = '당일 기쁜 마음으로 맞이하겠습니다.';
-    }
-
-    document.getElementById('rsvp-form-content').style.display = 'none';
-    document.getElementById('rsvp-thankyou').style.display = '';
-    showRSVPCompleted();
-  } catch {
-    btn.disabled = false;
-    btn.textContent = '제출하기';
-    showToast('전송에 실패했습니다. 다시 시도해 주세요.');
-  }
+  // 백그라운드: RSVP 저장(no-cors) + 개인 메시지 조회(GET)
+  saveRSVP(data);
+  fetchGuestMessage(nameVal, sideVal, attendVal).then((personalMsg) => {
+    if (personalMsg) setRSVPThankYouText(attendVal, personalMsg);
+  });
 }
 
 /* ===========================
@@ -855,17 +873,60 @@ function getCalendarUrl() {
   return 'https://calendar.google.com/calendar/render?' + params.toString();
 }
 
-function openCalendar() {
-  const ua = navigator.userAgent;
-  const isIOS = /iphone|ipad|ipod/i.test(ua);
+function getOutlookCalendarUrl() {
+  const text = `${WEDDING.groom} ♡ ${WEDDING.bride} 결혼식`;
+  const details = `${WEDDING.groom} · ${WEDDING.bride}의 결혼식에 초대합니다.\n\n청첩장: ${getInvitationUrl()}`;
+  const loc = `${WEDDING.venue} (${WEDDING.address})`;
+  const params = new URLSearchParams({
+    path: '/calendar/action/compose',
+    rru: 'addevent',
+    subject: text,
+    startdt: '2026-11-01T15:00:00',
+    enddt: '2026-11-01T17:00:00',
+    location: loc,
+    body: details,
+  });
+  return 'https://outlook.live.com/calendar/0/deeplink/compose?' + params.toString();
+}
 
-  if (isIOS) {
-    // iOS: .ics → Apple 캘린더 앱에서 바로 등록
-    location.replace(siteBase() + '/wedding.ics');
-  } else {
-    // Android·PC: Google Calendar 일정 추가 → 앱 또는 웹에서 바로 저장
-    location.replace(getCalendarUrl());
+let calendarPickerInited = false;
+
+function openCalendarApp(type) {
+  switch (type) {
+    case 'google':
+      window.location.href = getCalendarUrl();
+      break;
+    case 'apple':
+    case 'ics':
+      window.location.href = siteBase() + '/wedding.ics';
+      break;
+    case 'outlook':
+      window.location.href = getOutlookCalendarUrl();
+      break;
   }
+}
+
+function initCalendarPicker() {
+  if (calendarPickerInited) return;
+  calendarPickerInited = true;
+
+  document.getElementById('calendar-picker-event').innerHTML =
+    `${WEDDING.groom} ♡ ${WEDDING.bride} 결혼식<br>${WEDDING.dateKo}<br>${WEDDING.venue}`;
+
+  const back = document.getElementById('calendar-picker-back');
+  back.href = getInvitationUrl();
+
+  document.querySelectorAll('.calendar-picker-item').forEach((btn) => {
+    btn.addEventListener('click', () => openCalendarApp(btn.dataset.cal));
+  });
+}
+
+function showCalendarPicker() {
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('main').style.display = 'none';
+  document.getElementById('bgm-btn').style.display = 'none';
+  document.getElementById('calendar-picker').style.display = '';
+  initCalendarPicker();
 }
 
 function initKakaoShare() {
@@ -924,11 +985,12 @@ function showToast(msg) {
 document.addEventListener('DOMContentLoaded', async () => {
   // 카카오 공유 "일정 추가하기" 버튼 처리
   if (new URLSearchParams(location.search).get('action') === 'calendar') {
-    openCalendar();
+    showCalendarPicker();
     return;
   }
 
   await loadGuests();
+  warmAppsScript();
   initKakaoShare();
   initBGM();
   initLanding();
