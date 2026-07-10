@@ -52,4 +52,4 @@ const MAP_LINKS = {
 const WEATHER_API_KEY = '0b4e798993d32814f5e89cf0e3ed6da9';
 const WEATHER_API = `https://api.openweathermap.org/data/2.5/weather?q=Seoul&appid=${WEATHER_API_KEY}&units=metric`;
 
-const GALLERY_COUNT = 20;
+const GALLERY_COUNT = 17;
