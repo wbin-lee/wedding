@@ -378,15 +378,27 @@ let igComments = [];  // 사진별 댓글 배열 [{name, text}]
 let igLiked = [];     // 이 기기에서 내가 좋아요한 사진(빨강 유지용)
 const IG_DOT_STEP = 10; // 점 하나가 차지하는 폭(6px + margin 2px*2)
 
-const IG_CAPTIONS = [
-  '함께라서 더 빛나는 순간 ✨ #우빈여울 #웨딩 #2026',
-  '평생 너의 손을 잡고 걸을게 💍 #wedding',
-  '우리의 이야기가 시작되는 날 🤍 #예비부부',
-  '사랑한다는 말로는 부족한 하루 🌿 #weddingday',
-  '오래도록 이 미소 그대로 😊 #couple #11월의신부',
+const GALLERY_META = [
+  { caption: '나란히 서면, 모든 순간이 완벽해요 🤍 #우빈여울 #웨딩촬영', alt: '신랑 신부가 아치형 나무 문 앞에서 손을 잡고 서 있는 웨딩 사진' },
+  { caption: '하얀 카라 부케와 함께한 신랑의 하루 🌿 #신랑샷', alt: '검은 정장을 입은 신랑이 카라 부케를 들고 있는 사진' },
+  { caption: '하얀 드레스 속, 가장 예쁜 나의 하루 ✨ #신부샷', alt: '오프숄더 웨딩드레스를 입은 신부가 부케를 들고 서 있는 사진' },
+  { caption: '약지에 새겨진, 우리만의 약속 💍 #결혼반지', alt: '신랑 신부가 결혼반지를 보여주며 웃고 있는 사진' },
+  { caption: '장난스러운 표정도 우리만의 사랑이에요 😗 #우빈여울', alt: '신랑 신부가 장난스럽게 포즈를 취하는 클로즈업 사진' },
+  { caption: '창가에 앉아 나눈 조용한 이야기 🪟 #웨딩스냅', alt: '창가에 나란히 앉은 신랑 신부의 웨딩 사진' },
+  { caption: '핑크 안스리움 한 송이로 전하는 마음 🌺 #블랙룩', alt: '검은 드레스와 셔츠를 입고 핑크 꽃을 든 커플 사진' },
+  { caption: '계단 위에서 나눈 포근한 포옹 🤍 #우리의순간', alt: '계단에서 신랑을 안고 있는 신부의 사진' },
+  { caption: '서로를 바라보면 세상이 조용해져요 👀 #커플룩', alt: '검은 정장 차림으로 서로를 바라보는 커플 사진' },
+  { caption: '바닥에 앉아도 우리만의 무대예요 🖤 #자연스러운웃음', alt: '바닥에 앉아 환하게 웃고 있는 커플 사진' },
+  { caption: '케이크 한 입, 웃음 한 바가지 🎂 #케이크피딩', alt: '케이크를 나눠 먹으며 장난치는 커플 사진' },
+  { caption: '바람에 날리는 베일, 그 순간이 영화 같아요 🌬️ #야외촬영', alt: '야외에서 신랑이 신부의 베일을 들어 올리는 사진' },
+  { caption: '무릎 꿇고 들어 올린 베일, 그게 사랑이었어요 👰 #베일리프팅', alt: '풀밭에서 신랑이 신부의 베일을 들어 올리는 사진' },
+  { caption: '큰 나무 아래, 처음 만난 날처럼 🌳 #풀밭위에서', alt: '나무 아래 잔디밭에 앉아 있는 신랑 신부' },
+  { caption: '넓은 들판 위, 우리 둘만의 세계 🌿 #들판촬영', alt: '들판에서 신랑이 신부를 안고 서 있는 사진' },
+  { caption: '하늘 아래, 말 없이 나눈 키스 ☁️ #키스샷', alt: '야외 잔디밭에서 키스하는 신랑 신부' },
+  { caption: '눈을 감고 느낀, 행복의 온도 🌤️ #여유로운오후', alt: '잔디밭에 누워 눈을 감고 있는 신랑 신부' },
 ];
 
-function igCaption(i) { return IG_CAPTIONS[i % IG_CAPTIONS.length]; }
+function igCaption(i) { return GALLERY_META[i]?.caption ?? ''; }
 
 // 즉시 표시용 로컬 캐시(오프라인/첫 페인트). 실제 원본은 서버(Google Sheet).
 function igLoadState() {
@@ -456,7 +468,7 @@ function initGallery() {
     const img = document.createElement('img');
     img.className = 'ig-slide';
     img.src = `images/gallery-${String(i).padStart(2, '0')}.jpg`;
-    img.alt = `웨딩 사진 ${i}`;
+    img.alt = GALLERY_META[i - 1]?.alt ?? `웨딩 사진 ${i}`;
     img.loading = 'lazy';
     img.draggable = false;
     img.onerror = function () {
@@ -739,25 +751,6 @@ function initMapButtons() {
 }
 
 /* ===========================
-   Petals (Section 1)
-   =========================== */
-function initPetals() {
-  const container = document.getElementById('petals');
-  const petalChars = ['🌸', '🌺', '🍃'];
-
-  for (let i = 0; i < 25; i++) {
-    const petal = document.createElement('span');
-    petal.className = 'petal';
-    petal.textContent = petalChars[i % petalChars.length];
-    petal.style.left = Math.random() * 100 + '%';
-    petal.style.animationDuration = (4 + Math.random() * 6) + 's';
-    petal.style.animationDelay = Math.random() * 8 + 's';
-    petal.style.fontSize = (0.8 + Math.random() * 0.8) + 'rem';
-    container.appendChild(petal);
-  }
-}
-
-/* ===========================
    Scroll Animations
    =========================== */
 function observeSections() {
@@ -957,7 +950,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   initGallery();
   initAccounts();
   initMapButtons();
-  initPetals();
   initTimeCapsule();
   applyWeatherTheme();
 });
