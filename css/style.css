@@ -965,21 +965,6 @@ body {
 }
 
 /* ===========================
-   Time Capsule
-   =========================== */
-.section-timecapsule {
-  background: #fff;
-}
-.tc-desc {
-  font-size: 0.95rem;
-  color: #555;
-  margin-bottom: 24px;
-}
-.tc-form { max-width: 400px; margin: 0 auto; }
-.tc-form .form-input { margin-bottom: 12px; }
-.tc-form .form-textarea { margin-bottom: 16px; }
-
-/* ===========================
    Section 8: Footer
    =========================== */
 .section-footer {

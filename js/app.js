@@ -13,7 +13,6 @@ async function loadGuests() {
   const savedName = localStorage.getItem('rsvp-name') || '';
   document.getElementById('rsvp-name').value = savedName;
   document.getElementById('rsvp-section-name').textContent = savedName || '소중한 분';
-  document.getElementById('tc-name').value = savedName;
 
   // 이미 제출한 경우 완료 상태 표시
   if (localStorage.getItem('rsvp-submitted')) {
@@ -799,45 +798,6 @@ async function applyWeatherTheme() {
 }
 
 /* ===========================
-   Time Capsule
-   =========================== */
-function initTimeCapsule() {
-  document.getElementById('tc-submit').addEventListener('click', submitTimeCapsule);
-}
-
-async function submitTimeCapsule() {
-  const btn = document.getElementById('tc-submit');
-  const name = document.getElementById('tc-name').value.trim();
-  const message = document.getElementById('tc-message').value.trim();
-
-  if (!name || !message) {
-    showToast('성함과 메시지를 모두 입력해 주세요');
-    return;
-  }
-
-  btn.disabled = true;
-  btn.textContent = '전송 중...';
-
-  const data = { type: 'timecapsule', name, message };
-
-  try {
-    await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-
-    document.getElementById('tc-form-content').style.display = 'none';
-    document.getElementById('tc-thankyou').style.display = '';
-  } catch {
-    btn.disabled = false;
-    btn.textContent = '타임캡슐에 담기';
-    showToast('전송에 실패했습니다. 다시 시도해 주세요.');
-  }
-}
-
-/* ===========================
    Kakao Share (공유 카드 + 버튼)
    =========================== */
 function siteBase() {
@@ -950,6 +910,5 @@ document.addEventListener('DOMContentLoaded', async () => {
   initGallery();
   initAccounts();
   initMapButtons();
-  initTimeCapsule();
   applyWeatherTheme();
 });
