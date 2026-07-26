@@ -864,7 +864,7 @@ function shareKakao() {
       content: {
         title: `${WEDDING.groom} ♡ ${WEDDING.bride}, 우리 결혼합니다 💍`,
         description: `${WEDDING.dateKo}\n${WEDDING.venue}`,
-        imageUrl: siteBase() + '/images/hero.png',
+        imageUrl: siteBase() + '/images/teaser_hero.jpg',
         link: { mobileWebUrl: invitationUrl, webUrl: invitationUrl },
       },
       buttons: [
