@@ -397,6 +397,14 @@ body {
   object-fit: cover;
   object-position: center;
 }
+
+/* 넓은 화면·가로 화면: 세로 사진을 자르지 않고 전체 표시 */
+@media (min-width: 768px), (orientation: landscape) {
+  .hero-image {
+    object-fit: contain;
+    background: #fff;
+  }
+}
 .hero-overlay {
   position: absolute;
   inset: 0;
@@ -641,7 +649,10 @@ body {
   overflow: hidden;
   flex: 1 1 auto;
   min-height: 0;
-  touch-action: pan-y;
+  touch-action: pan-x pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 .ig-track { display: flex; height: 100%; transition: transform 0.35s ease; }
 .ig-slide {
@@ -650,6 +661,10 @@ body {
   object-fit: cover;
   display: block;
   user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  pointer-events: none;
+  -webkit-user-drag: none;
 }
 .ig-arrow {
   position: absolute;

@@ -393,6 +393,9 @@ const GALLERY_META = [
 ];
 
 function igCaption(i) { return GALLERY_META[i]?.caption ?? ''; }
+function gallerySrc(i1) {
+  return `images/gallery-${String(i1).padStart(2, '0')}.webp`;
+}
 
 // 즉시 표시용 로컬 캐시(오프라인/첫 페인트). 실제 원본은 서버(Google Sheet).
 function igLoadState() {
@@ -461,9 +464,9 @@ function initGallery() {
   for (let i = 1; i <= GALLERY_COUNT; i++) {
     const img = document.createElement('img');
     img.className = 'ig-slide';
-    img.src = `images/gallery-${String(i).padStart(2, '0')}.jpg`;
+    img.src = gallerySrc(i);
     img.alt = GALLERY_META[i - 1]?.alt ?? `웨딩 사진 ${i}`;
-    img.loading = 'lazy';
+    img.loading = i === 1 ? 'eager' : 'lazy';
     img.draggable = false;
     img.onerror = function () {
       this.src = `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" fill="#f0ede8"><rect width="100%" height="100%"/><text x="50%" y="50%" text-anchor="middle" fill="#c9a96e" font-size="20" font-family="serif">Photo ${i}</text></svg>`)}`;
@@ -506,14 +509,24 @@ function initGallery() {
   const savedNick = localStorage.getItem('ig-nick');
   if (savedNick) document.getElementById('ig-nick').value = savedNick;
 
-  // 미디어 영역: 스와이프 + 더블탭 좋아요
+  // 미디어 영역: 스와이프 + 더블탭 좋아요 + 확대 방지
   const media = document.getElementById('ig-media');
   let startX = 0, startY = 0, lastTap = 0;
 
+  media.addEventListener('contextmenu', (e) => e.preventDefault());
+  media.addEventListener('gesturestart', (e) => e.preventDefault());
+  media.addEventListener('gesturechange', (e) => e.preventDefault());
+  media.addEventListener('wheel', (e) => {
+    if (e.ctrlKey) e.preventDefault();
+  }, { passive: false });
   media.addEventListener('touchstart', (e) => {
+    if (e.touches.length > 1) e.preventDefault();
     startX = e.changedTouches[0].screenX;
     startY = e.changedTouches[0].screenY;
-  }, { passive: true });
+  }, { passive: false });
+  media.addEventListener('touchmove', (e) => {
+    if (e.touches.length > 1) e.preventDefault();
+  }, { passive: false });
 
   media.addEventListener('touchend', (e) => {
     const dx = e.changedTouches[0].screenX - startX;
@@ -649,7 +662,7 @@ function igEscape(s) {
 
 async function igShare() {
   const i = galleryIndex;
-  const rel = `images/gallery-${String(i + 1).padStart(2, '0')}.jpg`;
+  const rel = gallerySrc(i + 1);
   const abs = siteBase() + '/' + rel;
   const title = '우빈 ♡ 여울 Wedding';
   const text = `우빈 ♡ 여울의 웨딩 사진 (${i + 1}/${GALLERY_COUNT})`;
@@ -659,7 +672,7 @@ async function igShare() {
     try {
       const res = await fetch(rel);
       const blob = await res.blob();
-      const file = new File([blob], `wedding-${i + 1}.jpg`, { type: blob.type || 'image/jpeg' });
+      const file = new File([blob], `wedding-${i + 1}.webp`, { type: blob.type || 'image/webp' });
       if (navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], title, text });
         return;
