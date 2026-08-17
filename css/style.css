@@ -3,12 +3,14 @@
    =========================== */
 :root {
   --bg-landing: #0a0a0a;
-  --bg-main: #faf8f5;
+  --bg-main: #ffffff;
   --accent: #c9a96e;
   --accent-hover: #b8923d;
+  --accent-text: #7a5c28;
   --text-dark: #1a1a1a;
   --text-light: #ffffff;
-  --text-muted: #888;
+  --text-muted: #4a4a4a;
+  --border-soft: #e6e6e6;
   --font-display: 'Cormorant Garamond', serif;
   --font-body: 'Noto Serif KR', serif;
   --font-caption: 'Playfair Display', serif;
@@ -233,7 +235,7 @@ body {
   background: #fee500;
   color: #191600;
   font-weight: 700;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
 .btn-kakao-share:hover { background: #ffe200; }
 .btn-kakao-share .kakao-bubble { font-size: 1rem; }
@@ -348,6 +350,8 @@ body {
   justify-content: center;
   position: relative;
   overflow: hidden;
+  background: var(--bg-main);
+  color: var(--text-dark);
 }
 .section-inner {
   width: 100%;
@@ -363,7 +367,7 @@ body {
   font-family: var(--font-caption);
   font-size: 1.3rem;
   letter-spacing: 4px;
-  color: var(--accent);
+  color: var(--accent-text);
   margin-bottom: 32px;
 }
 
@@ -382,15 +386,16 @@ body {
    Section 1: Hero
    =========================== */
 .section-hero {
-  background: #111;
+  background: #fff;
   padding: 0;
 }
-.hero-video {
+.hero-image {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
 }
 .hero-overlay {
   position: absolute;
@@ -403,39 +408,39 @@ body {
    =========================== */
 .section-invitation {
   background: var(--bg-main);
-  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)' opacity='0.02'/%3E%3C/svg%3E");
 }
 .invitation-quote {
   font-size: 1.4rem;
-  color: var(--text-muted);
+  color: var(--text-dark);
   line-height: 2;
   margin-bottom: 28px;
 }
 .invitation-divider {
   width: 60px;
   height: 1px;
-  background: #ccc;
+  background: var(--border-soft);
   margin: 0 auto 28px;
 }
 .invitation-text {
   font-size: 0.95rem;
   line-height: 2;
   margin-bottom: 32px;
-  color: #444;
+  color: #2c2c2c;
 }
 .invitation-family p {
   font-size: 0.9rem;
   line-height: 2;
-  color: #555;
+  color: #2c2c2c;
 }
 .family-relation { color: var(--text-muted); font-size: 0.82rem; }
 
 /* ===========================
    Section 3: Date
    =========================== */
-.section-date { background: #fff; }
+.section-date { background: var(--bg-main); }
 .date-ko {
   font-size: 1rem;
+  color: var(--text-dark);
   margin-bottom: 4px;
 }
 .date-en {
@@ -447,7 +452,7 @@ body {
 .date-divider {
   width: 40px;
   height: 1px;
-  background: #ddd;
+  background: var(--border-soft);
   margin: 20px auto;
 }
 
@@ -468,12 +473,12 @@ body {
 .calendar td {
   font-size: 0.82rem;
   padding: 8px 10px;
-  color: #555;
+  color: #2c2c2c;
 }
 .calendar td.sunday { color: #e74c3c; }
 .calendar td.saturday { color: #3498db; }
 .calendar td.wedding-day {
-  background: var(--accent);
+  background: var(--accent-text);
   color: #fff;
   border-radius: 50%;
   font-weight: 700;
@@ -482,7 +487,7 @@ body {
   font-family: var(--font-caption);
   font-size: 0.9rem;
   letter-spacing: 2px;
-  color: var(--accent);
+  color: var(--accent-text);
   margin-bottom: 12px;
 }
 
@@ -499,7 +504,7 @@ body {
   font-family: var(--font-display);
   font-size: 2.2rem;
   font-weight: 600;
-  color: var(--accent);
+  color: var(--accent-text);
   min-width: 56px;
 }
 .dday-label {
@@ -512,8 +517,8 @@ body {
 .dday-sep {
   font-family: var(--font-display);
   font-size: 1.6rem;
-  color: var(--accent);
-  opacity: 0.5;
+  color: var(--accent-text);
+  opacity: 0.55;
   padding-bottom: 18px;
 }
 .dday-text {
@@ -563,8 +568,9 @@ body {
   text-align: left;
   font-size: 0.85rem;
   line-height: 1.6;
-  color: #555;
+  color: #2c2c2c;
   background: #fff;
+  border: 1px solid var(--border-soft);
   border-radius: 12px;
   padding: 14px 16px;
 }
@@ -574,7 +580,7 @@ body {
 /* ===========================
    Section 5: Gallery (Instagram UI)
    =========================== */
-.section-gallery { background: #fff; }
+.section-gallery { background: var(--bg-main); }
 /* 모바일: 화면 꽉 차게(섹션 여백 제거) / 데스크탑: 가운데 카드형(아래 미디어쿼리) */
 .ig-section-inner {
   padding: 0;
@@ -851,7 +857,7 @@ body {
   margin-bottom: 24px;
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-soft);
 }
 .tab-btn {
   flex: 1;
@@ -864,12 +870,13 @@ body {
   transition: all 0.2s;
 }
 .tab-btn.active {
-  background: var(--accent);
+  background: var(--accent-text);
   color: #fff;
 }
 
 .account-card {
   background: #fff;
+  border: 1px solid var(--border-soft);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 12px;
@@ -878,12 +885,13 @@ body {
 .account-name {
   font-weight: 700;
   font-size: 0.95rem;
+  color: var(--text-dark);
   margin-bottom: 4px;
 }
 .account-name .relation { color: var(--text-muted); font-weight: 400; font-size: 0.82rem; }
 .account-number {
   font-size: 0.85rem;
-  color: #555;
+  color: #2c2c2c;
   margin-bottom: 12px;
 }
 .account-actions {
@@ -895,8 +903,9 @@ body {
 .btn-account {
   padding: 8px 14px;
   border-radius: 6px;
-  border: 1px solid #ddd;
-  background: #fafafa;
+  border: 1px solid var(--border-soft);
+  background: #fff;
+  color: var(--text-dark);
   font-family: var(--font-body);
   font-size: 0.78rem;
   white-space: nowrap;
@@ -931,26 +940,28 @@ body {
    Section 7: RSVP
    =========================== */
 .section-rsvp {
-  background: var(--bg-landing);
-  color: var(--text-light);
+  background: var(--bg-main);
+  color: var(--text-dark);
 }
 .rsvp-name {
   font-size: 1.2rem;
+  color: var(--text-dark);
   margin-bottom: 8px;
 }
 .rsvp-prompt {
   font-size: 0.95rem;
   margin-bottom: 16px;
-  color: rgba(255,255,255,0.8);
+  color: #2c2c2c;
 }
 .rsvp-sub {
   font-size: 0.9rem;
   line-height: 1.8;
-  color: rgba(255,255,255,0.6);
+  color: var(--text-muted);
   margin-bottom: 20px;
 }
 .rsvp-couple {
   font-size: 0.95rem;
+  color: var(--text-dark);
   margin-bottom: 28px;
 }
 .rsvp-btn-group {
@@ -960,45 +971,47 @@ body {
   flex-wrap: wrap;
 }
 .btn-rsvp-open {
-  border-color: rgba(255,255,255,0.4);
-  color: #fff;
+  background: transparent;
+  border: 1px solid var(--accent-text);
+  color: var(--accent-text);
+}
+.btn-rsvp-open:hover {
+  background: rgba(122, 92, 40, 0.08);
 }
 
 /* ===========================
    Section 8: Footer
    =========================== */
 .section-footer {
-  background: #111;
-  color: var(--text-light);
+  background: var(--bg-main);
+  color: var(--text-dark);
   min-height: 100vh;
   min-height: 100dvh;
 }
 .footer-bg {
-  position: absolute;
-  inset: 0;
-  background: url('../images/footer.jpg') center/cover no-repeat #111;
+  display: none;
 }
 .footer-content { z-index: 2; }
 .footer-quote {
   font-size: 1.1rem;
   line-height: 2;
   margin-bottom: 12px;
-  color: rgba(255,255,255,0.9);
+  color: var(--text-dark);
 }
 .footer-author {
   font-size: 0.82rem;
-  color: rgba(255,255,255,0.5);
+  color: var(--text-muted);
   margin-bottom: 24px;
 }
 .footer-divider {
   width: 80px;
   height: 1px;
-  background: rgba(255,255,255,0.2);
+  background: var(--border-soft);
   margin: 0 auto 20px;
 }
 .footer-copy {
   font-size: 0.78rem;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-muted);
 }
 
 /* ===========================
@@ -1035,11 +1048,8 @@ body {
    =========================== */
 body.weather-rain {
   --accent: #7a9bb5;
-  --bg-main: #eef2f5;
 }
 body.weather-night {
-  --bg-main: #1a1a2e;
-  --text-dark: #e0e0e0;
   --accent: #c9a96e;
 }
 
