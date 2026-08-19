@@ -32,14 +32,13 @@ const SITE_URL = 'https://woobin-yeoul.vercel.app';
 
 const ACCOUNTS = {
   groom: [
-    { name: '이우빈', relation: '', bank: '카카오뱅크', number: '123-456-789012', kakao: 'https://qr.kakaopay.com/Ej8CUvMtj', toss: 'supertoss://send?&bank=토스뱅크&accountNo=1000-2536-3873' },
-    { name: '이성민', relation: '부', bank: '국민은행', number: '123-45-6789-00', kakao: '', toss: '' },
-    { name: '김혜련', relation: '모', bank: '신한은행', number: '123-456-78901', kakao: '', toss: '' },
+    { name: '이우빈', relation: '', bank: '토스뱅크', number: '1000-2536-3873', kakao: 'https://qr.kakaopay.com/Ej8CUvMtj', toss: 'supertoss://send?&bank=토스뱅크&accountNo=1000-2536-3873' },
+    { name: '김혜련', relation: '모', bank: '하나은행', number: '171-049477-00108', kakao: '', toss: '' },
   ],
   bride: [
-    { name: '이여울', relation: '', bank: '카카오뱅크', number: '000-000-000000', kakao: '', toss: '' },
-    { name: '이명재', relation: '부', bank: '하나은행', number: '000-000-000000', kakao: '', toss: '' },
-    { name: '이정희', relation: '모', bank: '우리은행', number: '000-000-000000', kakao: '', toss: '' },
+    { name: '이여울', relation: '', bank: '카카오뱅크', number: '3333-0506-62599', kakao: '', toss: '' },
+    { name: '이명재', relation: '부', bank: '하나은행', number: '50691082925007', kakao: '', toss: '' },
+    { name: '이정희', relation: '모', bank: 'IM뱅크', number: '22813002180', kakao: '', toss: '' },
   ],
 };
 
