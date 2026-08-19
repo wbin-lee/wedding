@@ -411,6 +411,117 @@ body {
   background: rgba(0,0,0,0.45);
 }
 
+/* Hero sky title: floats up after the photo appears */
+.hero-sky-title {
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  z-index: 2;
+  width: min(88%, 420px);
+  transform: translateX(-50%);
+  text-align: center;
+  pointer-events: none;
+}
+.hero-sky-text {
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.04em;
+  margin: 0;
+  font-family: 'Gaegu', 'Noto Serif KR', cursive;
+  font-weight: 700;
+  font-size: clamp(1.85rem, 7.2vw, 2.55rem);
+  letter-spacing: 0.06em;
+  line-height: 1;
+  color: #fffaf3;
+  text-shadow:
+    0 1px 0 rgba(255,255,255,0.35),
+    0 2px 10px rgba(38, 68, 110, 0.28);
+}
+.hero-sky-char {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(42px) scale(0.55) rotate(-8deg);
+  transform-origin: 50% 80%;
+}
+.hero-sky-gap { width: 0.42em; }
+.hero-sky-heart {
+  margin-left: 0.08em;
+  color: #ffc4d0;
+  font-size: 0.78em;
+  text-shadow: 0 2px 8px rgba(255, 150, 170, 0.35);
+}
+
+.section-hero.is-ready .hero-sky-char {
+  animation: sky-rise 0.82s cubic-bezier(0.22, 1.45, 0.36, 1) forwards;
+}
+.section-hero.is-ready .hero-sky-char:nth-child(1) { animation-delay: 0.05s; }
+.section-hero.is-ready .hero-sky-char:nth-child(2) { animation-delay: 0.14s; }
+.section-hero.is-ready .hero-sky-char:nth-child(4) { animation-delay: 0.28s; }
+.section-hero.is-ready .hero-sky-char:nth-child(5) { animation-delay: 0.38s; }
+.section-hero.is-ready .hero-sky-char:nth-child(6) { animation-delay: 0.48s; }
+.section-hero.is-ready .hero-sky-char:nth-child(7) { animation-delay: 0.58s; }
+.section-hero.is-ready .hero-sky-char:nth-child(8) { animation-delay: 0.68s; }
+.section-hero.is-ready .hero-sky-char:nth-child(9) { animation-delay: 0.84s; }
+
+.section-hero.is-ready .hero-sky-text {
+  animation: sky-bob 3.8s ease-in-out 1.8s infinite;
+}
+
+@keyframes sky-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(42px) scale(0.55) rotate(-10deg);
+  }
+  62% {
+    opacity: 1;
+    transform: translateY(-7px) scale(1.12) rotate(3deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+}
+
+@keyframes sky-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.hero-sky-sparkle {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 8px 2px rgba(255,255,255,0.75);
+  opacity: 0;
+  pointer-events: none;
+}
+.hero-sky-sparkle.s1 { top: -6px; left: 18%; }
+.hero-sky-sparkle.s2 { top: 18px; right: 14%; }
+.hero-sky-sparkle.s3 { top: -10px; right: 32%; width: 5px; height: 5px; }
+.section-hero.is-ready .hero-sky-sparkle.s1 { animation: sky-twinkle 2.2s ease-in-out 1.1s infinite; }
+.section-hero.is-ready .hero-sky-sparkle.s2 { animation: sky-twinkle 2.4s ease-in-out 1.45s infinite; }
+.section-hero.is-ready .hero-sky-sparkle.s3 { animation: sky-twinkle 2s ease-in-out 1.7s infinite; }
+
+@keyframes sky-twinkle {
+  0%, 100% { opacity: 0; transform: scale(0.4); }
+  40% { opacity: 0.95; transform: scale(1); }
+  70% { opacity: 0.2; transform: scale(0.6); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-sky-char,
+  .section-hero.is-ready .hero-sky-char,
+  .section-hero.is-ready .hero-sky-text,
+  .section-hero.is-ready .hero-sky-sparkle {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* ===========================
    Section 2: Invitation
    =========================== */

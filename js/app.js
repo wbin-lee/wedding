@@ -106,12 +106,27 @@ function initLanding() {
     const main = document.getElementById('main');
     landing.classList.add('hidden');
     main.style.display = '';
+    playHeroSkyTitle();
     // Trigger scroll animations for first visible section
     setTimeout(() => observeSections(), 300);
   });
 
   // RSVP button on landing
   document.getElementById('btn-landing-rsvp').addEventListener('click', openRSVP);
+}
+
+function playHeroSkyTitle() {
+  const hero = document.getElementById('sec-hero');
+  const img = hero && hero.querySelector('.hero-image');
+  if (!hero || !img) return;
+
+  const reveal = () => {
+    // Let the photo settle after the landing fade, then float the title into the sky
+    setTimeout(() => hero.classList.add('is-ready'), 700);
+  };
+
+  if (img.complete && img.naturalWidth) reveal();
+  else img.addEventListener('load', reveal, { once: true });
 }
 
 /* ===========================
