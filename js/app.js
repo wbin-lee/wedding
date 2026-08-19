@@ -115,18 +115,54 @@ function initLanding() {
   document.getElementById('btn-landing-rsvp').addEventListener('click', openRSVP);
 }
 
+function getHeroImageRect(img) {
+  const nw = img.naturalWidth;
+  const nh = img.naturalHeight;
+  const cw = img.clientWidth;
+  const ch = img.clientHeight;
+  if (!nw || !nh || !cw || !ch) return null;
+
+  const fit = getComputedStyle(img).objectFit || 'cover';
+  const scale = fit === 'contain'
+    ? Math.min(cw / nw, ch / nh)
+    : Math.max(cw / nw, ch / nh);
+  const w = nw * scale;
+  const h = nh * scale;
+  return { x: (cw - w) / 2, y: (ch - h) / 2, w, h };
+}
+
+function positionHeroNames() {
+  const hero = document.getElementById('sec-hero');
+  const img = hero && hero.querySelector('.hero-image');
+  const groom = hero && hero.querySelector('.hero-name-groom');
+  const bride = hero && hero.querySelector('.hero-name-bride');
+  if (!img || !groom || !bride) return;
+
+  const rect = getHeroImageRect(img);
+  if (!rect) return;
+
+  // Just outside each face: left of Woobin, right of Yeoul
+  groom.style.left = `${rect.x + rect.w * 0.29}px`;
+  groom.style.top = `${rect.y + rect.h * 0.535}px`;
+  bride.style.left = `${rect.x + rect.w * 0.73}px`;
+  bride.style.top = `${rect.y + rect.h * 0.535}px`;
+}
+
 function playHeroSkyTitle() {
   const hero = document.getElementById('sec-hero');
   const img = hero && hero.querySelector('.hero-image');
   if (!hero || !img) return;
 
   const reveal = () => {
+    positionHeroNames();
     // Let the photo settle after the landing fade, then float the title into the sky
     setTimeout(() => hero.classList.add('is-ready'), 700);
   };
 
   if (img.complete && img.naturalWidth) reveal();
   else img.addEventListener('load', reveal, { once: true });
+
+  window.addEventListener('resize', positionHeroNames);
 }
 
 /* ===========================
