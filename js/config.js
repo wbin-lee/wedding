@@ -43,8 +43,8 @@ const ACCOUNTS = {
 };
 
 const MAP_LINKS = {
-  naver: 'https://map.naver.com/v5/search/엘타워',
-  tmap: 'https://tmap.life/a67a5db2',
+  naver: 'https://map.naver.com/p/entry/place/12824078',
+  tmap: 'https://www.tmap.co.kr/tmap2/mobile/tmap.jsp?name=%EC%97%98%ED%83%80%EC%9B%8C&lon=127.0355977&lat=37.4823133',
   kakao: 'https://map.kakao.com/?q=엘타워',
 };
 
