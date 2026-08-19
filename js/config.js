@@ -42,10 +42,17 @@ const ACCOUNTS = {
   ],
 };
 
+const VENUE_GEO = {
+  name: '엘타워',
+  query: '서울 서초구 강남대로 213 엘타워',
+  lat: 37.4823133,
+  lng: 127.0355977,
+};
+
 const MAP_LINKS = {
-  naver: 'https://map.naver.com/p/entry/place/12824078',
-  tmap: 'https://www.tmap.co.kr/tmap2/mobile/tmap.jsp?name=%EC%97%98%ED%83%80%EC%9B%8C&lon=127.0355977&lat=37.4823133',
-  kakao: 'https://map.kakao.com/?q=엘타워',
+  naver: 'https://map.naver.com/p/search/' + encodeURIComponent(VENUE_GEO.query),
+  tmap: 'https://www.tmap.co.kr/tmap2/mobile/route.jsp?goalname=' + encodeURIComponent(VENUE_GEO.name) + '&goalx=' + VENUE_GEO.lng + '&goaly=' + VENUE_GEO.lat,
+  kakao: 'https://map.kakao.com/link/map/' + encodeURIComponent(VENUE_GEO.name) + ',' + VENUE_GEO.lat + ',' + VENUE_GEO.lng,
 };
 
 const WEATHER_API_KEY = '0b4e798993d32814f5e89cf0e3ed6da9';

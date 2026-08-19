@@ -799,13 +799,54 @@ async function copyAccount(number) {
 function initMapButtons() {
   const container = document.getElementById('map-buttons');
   const buttons = [
-    { label: '네이버지도', url: MAP_LINKS.naver },
-    { label: '티맵', url: MAP_LINKS.tmap },
-    { label: '카카오맵', url: MAP_LINKS.kakao },
+    { label: '네이버지도', type: 'naver' },
+    { label: '티맵', type: 'tmap' },
+    { label: '카카오맵', type: 'kakao' },
   ];
   container.innerHTML = buttons.map(b =>
-    `<a class="btn btn-map" href="${b.url}" target="_blank" rel="noopener">${b.label}</a>`
+    `<button type="button" class="btn btn-map" data-map="${b.type}">${b.label}</button>`
   ).join('');
+
+  container.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-map]');
+    if (btn) openVenueMap(btn.dataset.map);
+  });
+}
+
+function openVenueMap(type) {
+  const name = VENUE_GEO.name;
+  const query = VENUE_GEO.query;
+  const lat = VENUE_GEO.lat;
+  const lng = VENUE_GEO.lng;
+  const ua = navigator.userAgent;
+  const isAndroid = /Android/i.test(ua);
+  const isIOS = /iPhone|iPad|iPod/i.test(ua);
+
+  if (type === 'naver') {
+    const web = MAP_LINKS.naver;
+    if (isAndroid || isIOS) {
+      location.href = `nmap://search?query=${encodeURIComponent(query)}&appname=woobin-yeoul`;
+      setTimeout(() => { window.location.href = web; }, 800);
+    } else {
+      window.open(web, '_blank', 'noopener');
+    }
+    return;
+  }
+
+  if (type === 'tmap') {
+    const route = `route?goalname=${encodeURIComponent(name)}&goalx=${lng}&goaly=${lat}`;
+    if (isAndroid) {
+      location.href = `intent://${route}#Intent;scheme=tmap;package=com.skt.tmap.ku;S.browser_fallback_url=${encodeURIComponent(MAP_LINKS.tmap)};end`;
+    } else if (isIOS) {
+      location.href = `tmap://${route}`;
+      setTimeout(() => { window.location.href = MAP_LINKS.tmap; }, 800);
+    } else {
+      window.open(MAP_LINKS.tmap, '_blank', 'noopener');
+    }
+    return;
+  }
+
+  window.open(MAP_LINKS.kakao, '_blank', 'noopener');
 }
 
 /* ===========================
